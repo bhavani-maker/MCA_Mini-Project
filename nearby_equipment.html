@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>Nearby Equipment - Agricultural Rental</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial; background: #f5f5f5; }
+        .header { background: #2e7d32; color: white; padding: 20px; }
+        .nav { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .back-link { color: white; text-decoration: none; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 5px; }
+        .back-link:hover { background: rgba(255,255,255,0.3); }
+        
+        .page-title { font-size: 28px; color: #2e7d32; margin-bottom: 10px; text-align: center; }
+        .page-subtitle { color: #666; text-align: center; margin-bottom: 30px; }
+        
+        .filters { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .filter-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .filter-group { display: flex; flex-direction: column; }
+        label { font-weight: bold; margin-bottom: 5px; color: #333; }
+        input, select { padding: 8px; border: 2px solid #ddd; border-radius: 5px; }
+        input:focus, select:focus { outline: none; border-color: #4caf50; }
+        
+        .equipment-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+        .equipment-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-left: 5px solid #4caf50; }
+        .equipment-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .equipment-name { font-size: 18px; font-weight: bold; color: #2e7d32; }
+        .equipment-type { background: #e8f5e8; color: #2e7d32; padding: 4px 8px; border-radius: 12px; font-size: 12px; }
+        
+        .equipment-info { margin: 15px 0; }
+        .info-row { display: flex; justify-content: space-between; margin: 8px 0; }
+        .info-label { color: #666; font-size: 14px; }
+        .info-value { font-weight: bold; color: #333; }
+        .rate { color: #ff9800; font-size: 16px; font-weight: bold; }
+        
+        .distance-badge { background: #2196f3; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; }
+        .availability-badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .available { background: #e8f5e8; color: #2e7d32; }
+        .unavailable { background: #ffebee; color: #d32f2f; }
+        
+        .equipment-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .btn { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; text-align: center; }
+        .btn-primary { background: #4caf50; color: white; }
+        .btn-secondary { background: #2196f3; color: white; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        
+        .empty-state { text-align: center; padding: 60px 20px; color: #666; }
+        .empty-icon { font-size: 64px; margin-bottom: 20px; }
+        
+        @media (max-width: 768px) {
+            .equipment-grid { grid-template-columns: 1fr; }
+            .filter-row { grid-template-columns: 1fr; }
+            .equipment-actions { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="nav">
+            <h1>📍 Nearby Equipment</h1>
+            <a href="/farmer_dashboard" class="back-link">← Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="page-title">Equipment Available Near You</div>
+        <div class="page-subtitle">Find and book agricultural equipment in your area</div>
+        
+        <div class="filters">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="equipment-type">Equipment Type:</label>
+                    <select id="equipment-type">
+                        <option value="">All Types</option>
+                        <option value="tractor">Tractor</option>
+                        <option value="harvester">Harvester</option>
+                        <option value="cultivator">Cultivator</option>
+                        <option value="sprayer">Sprayer</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="max-distance">Max Distance (km):</label>
+                    <select id="max-distance">
+                        <option value="">Any Distance</option>
+                        <option value="5">Within 5 km</option>
+                        <option value="10">Within 10 km</option>
+                        <option value="20">Within 20 km</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="max-price">Max Price (₹/hour):</label>
+                    <input type="number" id="max-price" placeholder="Enter max price">
+                </div>
+                <div class="filter-group">
+                    <label for="search">Search Equipment:</label>
+                    <input type="text" id="search" placeholder="Search by name or owner">
+                </div>
+            </div>
+        </div>
+        
+        {% if equipment_list %}
+        <div class="equipment-grid" id="equipment-grid">
+            {% for equipment in equipment_list %}
+            <div class="equipment-card" data-type="{{ equipment.type.lower() }}" data-distance="{{ equipment.distance }}" data-price="{{ equipment.hourly_rate }}">
+                <div class="equipment-header">
+                    <div>
+                        <div class="equipment-name">🚜 {{ equipment.name }}</div>
+                        <div class="equipment-type">{{ equipment.type }}</div>
+                    </div>
+                    <div class="distance-badge">{{ equipment.distance }} km away</div>
+                </div>
+                
+                <div class="equipment-info">
+                    <div class="info-row">
+                        <span class="info-label">Owner:</span>
+                        <span class="info-value">{{ equipment.owner }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Location:</span>
+                        <span class="info-value">{{ equipment.location }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Hourly Rate:</span>
+                        <span class="info-value rate">₹{{ equipment.hourly_rate }}/hour</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Availability:</span>
+                        <span class="availability-badge {{ 'available' if equipment.available else 'unavailable' }}">
+                            {{ 'Available' if equipment.available else 'Not Available' }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="equipment-actions">
+                    <a href="/equipment/{{ equipment.id }}" class="btn btn-secondary">📋 View Details</a>
+                    {% if equipment.available %}
+                        <a href="/book/{{ equipment.name.lower().replace(' ', '_') }}" class="btn btn-primary">📅 Book Now</a>
+                    {% else %}
+                        <button class="btn" style="background: #ccc; cursor: not-allowed;" disabled>Not Available</button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <h3>No Equipment Found</h3>
+            <p>No equipment available in your area at the moment.</p>
+            <a href="/recommend" class="btn btn-primary" style="margin-top: 20px;">
+                🤖 Get Equipment Recommendations
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <script>
+        // Filter functionality
+        function filterEquipment() {
+            const typeFilter = document.getElementById('equipment-type').value.toLowerCase();
+            const distanceFilter = parseFloat(document.getElementById('max-distance').value) || Infinity;
+            const priceFilter = parseFloat(document.getElementById('max-price').value) || Infinity;
+            const searchFilter = document.getElementById('search').value.toLowerCase();
+            
+            const cards = document.querySelectorAll('.equipment-card');
+            let visibleCount = 0;
+            
+            cards.forEach(card => {
+                const type = card.getAttribute('data-type');
+                const distance = parseFloat(card.getAttribute('data-distance'));
+                const price = parseFloat(card.getAttribute('data-price'));
+                const text = card.textContent.toLowerCase();
+                
+                const typeMatch = !typeFilter || type === typeFilter;
+                const distanceMatch = distance <= distanceFilter;
+                const priceMatch = price <= priceFilter;
+                const searchMatch = !searchFilter || text.includes(searchFilter);
+                
+                if (typeMatch && distanceMatch && priceMatch && searchMatch) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Show/hide empty state
+            const grid = document.getElementById('equipment-grid');
+            const emptyState = document.querySelector('.empty-state');
+            
+            if (visibleCount === 0 && cards.length > 0) {
+                if (grid) grid.style.display = 'none';
+                if (!emptyState) {
+                    const container = document.querySelector('.container');
+                    container.innerHTML += `
+                        <div class="empty-state">
+                            <div class="empty-icon">🔍</div>
+                            <h3>No Equipment Found</h3>
+                            <p>No equipment matches your current filters.</p>
+                        </div>
+                    `;
+                }
+            } else {
+                if (grid) grid.style.display = 'grid';
+                const dynamicEmptyState = document.querySelector('.empty-state');
+                if (dynamicEmptyState && visibleCount > 0) {
+                    dynamicEmptyState.remove();
+                }
+            }
+        }
+        
+        // Add event listeners
+        document.getElementById('equipment-type').addEventListener('change', filterEquipment);
+        document.getElementById('max-distance').addEventListener('change', filterEquipment);
+        document.getElementById('max-price').addEventListener('input', filterEquipment);
+        document.getElementById('search').addEventListener('input', filterEquipment);
+    </script>
+</body>
+</html>

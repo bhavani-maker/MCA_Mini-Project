@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate="equipment_rental">Equipment Rental Service - Krushi Rent AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="{{ url_for('static', filename='js/krushi-translations.js') }}"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #2c3e50, #34495e) !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 1.5rem 0;
+            margin-bottom: 1rem;
+        }
+        
+        .hero-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .search-section {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: -1rem auto 1.5rem;
+            max-width: 800px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .equipment-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            background: white;
+            height: 100%;
+        }
+        
+        .equipment-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        .equipment-image {
+            height: 160px;
+            object-fit: cover;
+            width: 100%;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .card-body {
+            padding: 1rem;
+        }
+        
+        .equipment-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.3rem;
+        }
+        
+        .equipment-type {
+            color: #6c757d;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .equipment-description {
+            color: #495057;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+        }
+        
+        .price-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .price-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.3rem 0.6rem;
+            border-radius: 15px;
+        }
+        
+        .owner-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .owner-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            margin-right: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .btn-book {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .btn-book:hover {
+            background: linear-gradient(135deg, #218838, #1ea080);
+            transform: translateY(-2px);
+        }
+        
+        .filter-section {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        
+        .stats-bar {
+            background: white;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #007bff;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+        
+        .no-equipment {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title { font-size: 1.5rem; }
+            .search-section { margin: -0.5rem 1rem 1rem; padding: 1rem; }
+            .stats-bar { flex-direction: column; gap: 0.5rem; }
+            .equipment-image { height: 140px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-store me-2"></i><span data-translate="equipment_rental">Equipment Rental Service</span>
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link text-white me-3" href="{{ url_for('farmer_dashboard') }}">
+                    <i class="fas fa-arrow-left me-1"></i><span data-translate="back_to_dashboard">Back to Dashboard</span>
+                </a>
+                <span class="navbar-text me-3">
+                    <i class="fas fa-user me-2"></i><span data-translate="welcome">Welcome</span>, {{ session.user_name }}
+                </span>
+                <a class="btn btn-outline-light btn-sm" href="{{ url_for('logout') }}">
+                    <i class="fas fa-sign-out-alt me-2"></i><span data-translate="logout">Logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container text-center">
+            <h1 class="hero-title">
+                <i class="fas fa-tools me-3"></i><span data-translate="professional_equipment_rental">Professional Equipment Rental</span>
+            </h1>
+            <p class="hero-subtitle" data-translate="discover_equipment">
+                Discover high-quality agricultural equipment from trusted owners across your region
+            </p>
+        </div>
+    </div>
+
+    <!-- Search & Filter Section -->
+    <div class="container">
+        <div class="search-section">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search equipment..." data-translate="search_equipment">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="typeFilter">
+                        <option value="" data-translate="all_types">All Types</option>
+                        <option value="Tractor">Tractors</option>
+                        <option value="Harvester">Harvesters</option>
+                        <option value="Seeder">Seeders</option>
+                        <option value="Sprayer">Sprayers</option>
+                        <option value="Cultivator">Cultivators</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="priceFilter">
+                        <option value="" data-translate="all_prices">All Prices</option>
+                        <option value="low" data-translate="under_1000">Under ₹1000/day</option>
+                        <option value="medium" data-translate="price_1000_2000">₹1000-2000/day</option>
+                        <option value="high" data-translate="above_2000">Above ₹2000/day</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100" onclick="applyFilters()">
+                        <i class="fas fa-filter me-1"></i><span data-translate="filter">Filter</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Bar -->
+        {% if equipment %}
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number">{{ equipment|length }}</div>
+                <div class="stat-label" data-translate="available_equipment">Available Equipment</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ equipment|map(attribute='owner_name')|unique|list|length }}</div>
+                <div class="stat-label" data-translate="trusted_owners">Trusted Owners</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">₹{{ "%.0f"|format(equipment|map(attribute='price_per_day')|min) }}</div>
+                <div class="stat-label" data-translate="starting_from">Starting From</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label" data-translate="support_available">Support Available</div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Equipment Grid -->
+        {% if equipment %}
+        <div class="row" id="equipmentGrid">
+            {% for eq in equipment %}
+            <div class="col-lg-4 col-md-6 mb-4 equipment-item" data-type="{{ eq.type }}" data-price="{{ eq.price_per_day }}" data-name="{{ eq.display_name.lower() }}">
+                <div class="card equipment-card h-100">
+                    {% if eq.image %}
+                    <img src="{{ url_for('static', filename='uploads/' + eq.image) }}" 
+                         class="equipment-image" alt="{{ eq.display_name }}"
+                         onerror="this.src='https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=220&fit=crop&crop=center';">
+                    {% else %}
+                    <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=220&fit=crop&crop=center" 
+                         class="equipment-image" alt="{{ eq.display_name }}">
+                    {% endif %}
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="equipment-title" 
+                            data-name-en="{{ eq.name_en }}"
+                            data-name-hi="{{ eq.name_hi }}"
+                            data-name-te="{{ eq.name_te }}"
+                            data-name-kn="{{ eq.name_kn }}"
+                            data-name-ta="{{ eq.name_ta }}">
+                            {{ eq.name_en }}
+                            {% if eq.name_local %}
+                            <small class="text-muted">({{ eq.name_local }})</small>
+                            {% endif %}
+                        </h5>
+                        <p class="equipment-type">
+                            <i class="fas fa-tag me-1"></i>{{ eq.type }} • 
+                            <i class="fas fa-map-marker-alt me-1"></i>{{ eq.location }}
+                        </p>
+                        
+                        <p class="equipment-description">{{ eq.display_description or 'Professional agricultural equipment available for rent.' }}</p>
+                        
+                        <div class="owner-info">
+                            <div class="owner-avatar">{{ eq.owner_name[0].upper() }}</div>
+                            <div>
+                                <div class="fw-semibold">{{ eq.owner_name }}</div>
+                                <small class="text-muted" data-translate="equipment_owner">Equipment Owner</small>
+                            </div>
+                        </div>
+                        
+                        <div class="price-section">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-success price-badge">
+                                    <i class="fas fa-clock me-1"></i>₹{{ eq.price_per_hour }}/hour
+                                </span>
+                                <span class="badge bg-primary price-badge">
+                                    <i class="fas fa-calendar-day me-1"></i>₹{{ eq.price_per_day }}/day
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-auto">
+                            <button class="btn btn-success btn-book" onclick="bookEquipment({{ eq.id }}, '{{ eq.display_name }}', {{ eq.price_per_hour }})">
+                                <i class="fas fa-calendar-plus me-2"></i><span data-translate="book_now">Book Now</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-equipment">
+            <i class="fas fa-tools fa-4x text-muted mb-4"></i>
+            <h3 class="text-muted mb-3" data-translate="no_equipment_available">No Equipment Available</h3>
+            <p class="text-muted mb-4" data-translate="no_equipment_message">Currently, there are no equipment items available for rent. Please check back later or contact equipment owners directly.</p>
+            <a href="{{ url_for('farmer_dashboard') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-arrow-left me-2"></i><span data-translate="back_to_dashboard">Back to Dashboard</span>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Booking Modal -->
+    <div class="modal fade" id="bookingModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" data-translate="book_equipment">Book Equipment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="bookingForm">
+                        <input type="hidden" id="equipment_id">
+                        <div class="mb-3">
+                            <label class="form-label" data-translate="equipment">Equipment</label>
+                            <input type="text" class="form-control" id="equipment_name" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" data-translate="booking_date">Booking Date</label>
+                            <input type="date" class="form-control" id="booking_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" data-translate="duration_hours">Duration (hours)</label>
+                            <input type="number" class="form-control" id="duration_hours" min="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" data-translate="delivery_address">Delivery Address</label>
+                            <textarea class="form-control" id="delivery_address" rows="2" required data-translate-placeholder="delivery_address_placeholder" placeholder="Enter complete address for equipment delivery"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" data-translate="total_amount">Total Amount</label>
+                            <input type="text" class="form-control" id="total_amount" readonly>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-translate="cancel">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="confirmBooking()" data-translate="confirm_booking">Confirm Booking</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-translate page on load based on session language
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentLang = '{{ current_lang }}';
+            
+            fetch('/api/translations/' + currentLang)
+                .then(response => response.json())
+                .then(translations => {
+                    // Update all elements with data-translate attribute
+                    document.querySelectorAll('[data-translate]').forEach(el => {
+                        const key = el.getAttribute('data-translate');
+                        if (translations[key]) {
+                            if (el.tagName === 'INPUT' && el.placeholder) {
+                                el.placeholder = translations[key];
+                            } else {
+                                el.textContent = translations[key];
+                            }
+                        }
+                    });
+                    
+                    // Update equipment names dynamically
+                    document.querySelectorAll('.equipment-title').forEach(title => {
+                        const nameEn = title.getAttribute('data-name-en');
+                        const nameLocal = title.getAttribute('data-name-' + currentLang);
+                        
+                        if (nameLocal && nameLocal !== nameEn) {
+                            title.innerHTML = nameEn + ' <small class="text-muted">(' + nameLocal + ')</small>';
+                        } else {
+                            title.textContent = nameEn;
+                        }
+                    });
+                });
+        });
+
+        
+        // Search and Filter Functionality
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const typeFilter = document.getElementById('typeFilter').value;
+            const priceFilter = document.getElementById('priceFilter').value;
+            const equipmentItems = document.querySelectorAll('.equipment-item');
+            
+            equipmentItems.forEach(item => {
+                const name = item.dataset.name;
+                const type = item.dataset.type;
+                const price = parseFloat(item.dataset.price);
+                
+                let showItem = true;
+                
+                // Search filter
+                if (searchTerm && !name.includes(searchTerm)) {
+                    showItem = false;
+                }
+                
+                // Type filter
+                if (typeFilter && type !== typeFilter) {
+                    showItem = false;
+                }
+                
+                // Price filter
+                if (priceFilter) {
+                    if (priceFilter === 'low' && price >= 1000) showItem = false;
+                    if (priceFilter === 'medium' && (price < 1000 || price > 2000)) showItem = false;
+                    if (priceFilter === 'high' && price <= 2000) showItem = false;
+                }
+                
+                item.style.display = showItem ? 'block' : 'none';
+            });
+        }
+        
+        // Real-time search
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('typeFilter').addEventListener('change', applyFilters);
+        document.getElementById('priceFilter').addEventListener('change', applyFilters);
+        
+        function bookEquipment(equipmentId, equipmentName, pricePerHour) {
+            document.getElementById('equipment_id').value = equipmentId;
+            document.getElementById('equipment_name').value = equipmentName;
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('booking_date').min = today;
+            
+            // Update total amount calculation
+            const durationInput = document.getElementById('duration_hours');
+            const totalAmountInput = document.getElementById('total_amount');
+            
+            durationInput.oninput = function() {
+                const hours = parseFloat(this.value) || 0;
+                const total = hours * pricePerHour;
+                totalAmountInput.value = '₹' + total.toFixed(2);
+            };
+            
+            new bootstrap.Modal(document.getElementById('bookingModal')).show();
+        }
+        
+        async function confirmBooking() {
+            const bookingData = {
+                equipment_id: document.getElementById('equipment_id').value,
+                booking_date: document.getElementById('booking_date').value,
+                duration_hours: document.getElementById('duration_hours').value,
+                delivery_address: document.getElementById('delivery_address').value
+            };
+            
+            if (!bookingData.booking_date || !bookingData.duration_hours || !bookingData.delivery_address) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/book_equipment', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(bookingData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Redirect to payment page instead of showing alert
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert('⚠ Booking failed: ' + (data.error || 'Please try again.'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('⚠ Booking failed. Please check your connection and try again.');
+            }
+        }
+        
+        // Enhanced modal interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('bookingModal');
+            if (modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    document.getElementById('bookingForm').reset();
+                });
+            }
+        });
+    </script>
+
+    <script src="{{ url_for('static', filename='js/language-sync.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

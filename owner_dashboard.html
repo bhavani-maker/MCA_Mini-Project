@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate="owner_dashboard_title">Owner Dashboard - Krushi Rent AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="{{ url_for('static', filename='js/krushi-translations.js') }}"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f0f8ff 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #007bff, #0056b3) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .equipment-card {
+            border-left: 4px solid #007bff;
+            margin-bottom: 1rem;
+        }
+        
+        .booking-card {
+            border-left: 4px solid #28a745;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            text-align: center;
+        }
+        
+        .earnings-card {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            text-align: center;
+        }
+        
+        .stats-number {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        .equipment-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            background: white;
+            margin-bottom: 1rem;
+        }
+        
+        .equipment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        }
+        
+        .equipment-icon-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 150px;
+            height: 120px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            margin: auto;
+        }
+        
+        .equipment-icon {
+            font-size: 48px;
+            color: white;
+        }
+        
+        .equipment-card .equipment-icon-container {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+        
+        .equipment-card:nth-child(2n) .equipment-icon-container {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+        }
+        
+        .equipment-card:nth-child(3n) .equipment-icon-container {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+        }
+        
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .suggestion-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .suggestion-item:hover {
+            background: #f5f5f5;
+        }
+        
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-cogs me-2"></i><span data-translate="owner_dashboard_title">Krushi Rent AI - Owner</span>
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">
+                    <i class="fas fa-user me-2"></i><span data-translate="welcome">Welcome</span>, {{ session.user_name }}
+                </span>
+                <a class="btn btn-outline-light btn-sm" href="{{ url_for('logout') }}">
+                    <i class="fas fa-sign-out-alt me-2"></i><span data-translate="logout">Logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Stats Row -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="stats-number">{{ equipment|length }}</div>
+                        <div data-translate="my_equipment">Total Equipment</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card earnings-card">
+                    <div class="card-body">
+                        <div class="stats-number">₹{{ "%.0f"|format(total_earnings) }}</div>
+                        <div data-translate="total_earnings">Total Earnings</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="stats-number">{{ bookings|length }}</div>
+                        <div data-translate="recent_bookings">Total Bookings</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Equipment Management -->
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-tools me-2"></i><span data-translate="my_equipment">My Equipment</span></h5>
+                        <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addEquipmentModal">
+                            <i class="fas fa-plus me-2"></i><span data-translate="add_equipment">Add Equipment</span>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        {% if equipment %}
+                            {% for item in equipment %}
+                            <div class="equipment-card card mb-3">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-2">
+                                            <img src="{% if item.type == 'Tractor' %}https://cdn.pixabay.com/photo/2016/04/01/09/11/tractor-1299044_960_720.png{% elif item.type == 'Harvester' %}https://cdn.pixabay.com/photo/2013/07/12/18/20/combine-harvester-153350_960_720.png{% elif item.type == 'Seeder' %}https://cdn.pixabay.com/photo/2017/09/25/13/12/tractor-2784127_960_720.jpg{% elif item.type == 'Sprayer' %}https://cdn.pixabay.com/photo/2016/04/01/09/11/tractor-1299051_960_720.png{% elif item.type == 'Cultivator' %}https://cdn.pixabay.com/photo/2016/04/01/09/11/tractor-1299044_960_720.png{% else %}https://cdn.pixabay.com/photo/2016/04/01/09/11/tractor-1299044_960_720.png{% endif %}" 
+                                                 class="img-fluid rounded" alt="{{ item.name }}" 
+                                                 style="width: 80px; height: 60px; object-fit: cover;">
+                                        </div>
+                                        <div class="col-md-4">
+                                            {% if item.image %}
+                                                <img src="{{ url_for('static', filename='uploads/' + item.image) }}" 
+                                                     class="img-fluid rounded" alt="{{ item.name }}" 
+                                                     style="width: 150px; height: 120px; object-fit: cover; border-radius: 15px;"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                <div class="equipment-icon-container" style="display: none; width: 150px; height: 120px;">
+                                                    <i class="fas fa-{% if item.type == 'Tractor' %}tractor{% elif item.type == 'Harvester' %}cut{% elif item.type == 'Seeder' %}seedling{% elif item.type == 'Sprayer' %}spray-can{% elif item.type == 'Cultivator' %}tools{% elif item.type == 'Leveler' %}level-up-alt{% elif item.type == 'Mulcher' %}leaf{% elif item.type == 'Chopper' %}cut{% elif item.type == 'Pump' %}water{% elif item.type == 'Irrigation' %}tint{% elif item.type == 'Planter' %}seedling{% elif item.type == 'Mower' %}cut{% elif item.type == 'Loader' %}truck-loading{% elif item.type == 'Trailer' %}trailer{% elif item.type == 'Weeder' %}tools{% else %}cogs{% endif %} equipment-icon" style="font-size: 48px;"></i>
+                                                </div>
+                                            {% else %}
+                                                <div class="equipment-icon-container" style="width: 150px; height: 120px;">
+                                                    <i class="fas fa-{% if item.type == 'Tractor' %}tractor{% elif item.type == 'Harvester' %}cut{% elif item.type == 'Seeder' %}seedling{% elif item.type == 'Sprayer' %}spray-can{% elif item.type == 'Cultivator' %}tools{% elif item.type == 'Leveler' %}level-up-alt{% elif item.type == 'Mulcher' %}leaf{% elif item.type == 'Chopper' %}cut{% elif item.type == 'Pump' %}water{% elif item.type == 'Irrigation' %}tint{% elif item.type == 'Planter' %}seedling{% elif item.type == 'Mower' %}cut{% elif item.type == 'Loader' %}truck-loading{% elif item.type == 'Trailer' %}trailer{% elif item.type == 'Weeder' %}tools{% else %}cogs{% endif %} equipment-icon" style="font-size: 48px;"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-5">
+                                            <h6 class="card-title mb-1">
+                                                <span class="equipment-name" data-name-en="{{ item.name }}">{{ item.name }}</span>
+                                            </h6>
+                                            <p class="text-muted mb-1">{{ item.description }}</p>
+                                            <small class="text-primary">
+                                                <i class="fas fa-tag me-1"></i>{{ item.type }} | 
+                                                <i class="fas fa-map-marker-alt me-1"></i>{{ item.location }}
+                                            </small><br>
+                                            <small class="text-success">
+                                                <i class="fas fa-rupee-sign me-1"></i>₹{{ item.price_per_hour }}/hour | 
+                                                ₹{{ item.price_per_day }}/day
+                                            </small>
+                                        </div>
+                                        <div class="col-md-3 text-end">
+                                            <span class="badge bg-{{ 'success' if item.available else 'secondary' }} mb-2">
+                                                <span data-translate="{{ 'available' if item.available else 'unavailable' }}">{{ 'Available' if item.available else 'Unavailable' }}</span>
+                                            </span><br>
+                                            <button class="btn btn-outline-primary btn-sm me-1" onclick="editEquipment({{ item.id }})">
+                                                <i class="fas fa-edit me-1"></i><span data-translate="edit">Edit</span>
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-sm" onclick="deleteEquipment({{ item.id }}, '{{ item.name }}')">
+                                                <i class="fas fa-trash me-1"></i><span data-translate="delete">Delete</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-tools fa-3x text-muted mb-3"></i>
+                                <p class="text-muted" data-translate="no_equipment">No equipment added yet. Start by adding your first equipment!</p>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEquipmentModal">
+                                    <i class="fas fa-plus me-2"></i><span data-translate="add_equipment">Add Equipment</span>
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Bookings -->
+            <div class="col-lg-4">
+                <!-- Ratings Summary -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-star me-2"></i><span data-translate="equipment_ratings">Equipment Ratings</span></h6>
+                    </div>
+                    <div class="card-body" id="ownerRatingsBody">
+                        <div class="text-center text-muted small">Loading ratings...</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-calendar-check me-2"></i><span data-translate="recent_bookings">Recent Bookings</span></h6>
+                    </div>
+                    <div class="card-body">
+                        {% if bookings %}
+                            {% for booking in bookings %}
+                            <div class="booking-card card mb-2">
+                                <div class="card-body p-3">
+                                    <h6 class="card-title mb-1">{{ booking.equipment_name }}</h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-user me-1"></i>{{ booking.farmer_name }}<br>
+                                        <i class="fas fa-calendar me-1"></i>{{ booking.booking_date }}<br>
+                                        <i class="fas fa-rupee-sign me-1"></i>₹{{ booking.total_amount }}
+                                    </small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted" data-translate="no_bookings">No bookings yet. Add equipment to start receiving bookings!</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Equipment Modal -->
+    <div class="modal fade" id="addEquipmentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" data-translate="add_new_equipment">Add New Equipment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addEquipmentForm" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label" data-translate="equipment_name">Equipment Name</label>
+                                    <input type="text" class="form-control" id="equipment_name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label" data-translate="equipment_type">Equipment Type</label>
+                                    <input type="text" class="form-control" id="equipment_type" placeholder="Search equipment type..." required autocomplete="off">
+                                    <div id="equipmentTypeSuggestions" class="suggestions"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label" data-translate="price_per_hour">Price per Hour (₹)</label>
+                                    <input type="number" class="form-control" id="price_per_hour" step="10" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label" data-translate="price_per_day">Price per Day (₹)</label>
+                                    <input type="number" class="form-control" id="price_per_day" step="50" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" data-translate="location">Location</label>
+                            <input type="text" class="form-control" id="equipment_location" placeholder="City, State" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" data-translate="description">Description</label>
+                            <textarea class="form-control" id="equipment_description" rows="3" placeholder="Describe your equipment..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Equipment Image</label>
+                            <input type="file" class="form-control" id="equipment_image" accept="image/*">
+                            <small class="text-muted">Upload a clear image of your equipment (optional)</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-translate="cancel">Cancel</button>
+                    <button type="button" class="btn btn-success" onclick="addEquipment()" data-translate="add_equipment">Add Equipment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/language-sync.js') }}"></script>
+    
+    <!-- Edit Equipment Modal -->
+    <div class="modal fade" id="editEquipmentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" data-translate="edit_equipment">Edit Equipment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editEquipmentForm" enctype="multipart/form-data">
+                        <input type="hidden" id="edit_equipment_id">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label" data-translate="equipment_name">Equipment Name</label>
+                                    <input type="text" class="form-control" id="edit_equipment_name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label" data-translate="equipment_type">Equipment Type</label>
+                                    <input type="text" class="form-control" id="edit_equipment_type" placeholder="Search equipment type..." required autocomplete="off">
+                                    <div id="editEquipmentTypeSuggestions" class="suggestions"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label" data-translate="price_per_hour">Price per Hour (₹)</label>
+                                    <input type="number" class="form-control" id="edit_price_per_hour" step="10" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label" data-translate="price_per_day">Price per Day (₹)</label>
+                                    <input type="number" class="form-control" id="edit_price_per_day" step="50" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" data-translate="location">Location</label>
+                            <input type="text" class="form-control" id="edit_equipment_location" placeholder="City, State" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" data-translate="description">Description</label>
+                            <textarea class="form-control" id="edit_equipment_description" rows="3" placeholder="Describe your equipment..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Equipment Image</label>
+                            <input type="file" class="form-control" id="edit_equipment_image" accept="image/*">
+                            <small class="text-muted">Upload a new image to replace current one (optional)</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-translate="cancel">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="updateEquipment()" data-translate="update_equipment">Update Equipment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Auto-translate page on load based on session language
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentLang = '{{ current_lang }}';
+            loadOwnerRatings();
+            
+            fetch('/api/translations/' + currentLang)
+                .then(response => response.json())
+                .then(translations => {
+                    document.querySelectorAll('[data-translate]').forEach(el => {
+                        const key = el.getAttribute('data-translate');
+                        if (translations[key]) {
+                            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                                el.placeholder = translations[key];
+                            } else {
+                                el.textContent = translations[key];
+                            }
+                        }
+                    });
+                    
+                    // Translate equipment names
+                    document.querySelectorAll('.equipment-name').forEach(nameEl => {
+                        const nameEn = nameEl.getAttribute('data-name-en');
+                        const nameTrans = translations[nameEn];
+                        if (nameTrans && currentLang !== 'en') {
+                            nameEl.textContent = nameEn + ' (' + nameTrans + ')';
+                        } else {
+                            nameEl.textContent = nameEn;
+                        }
+                    });
+                });
+        });
+        
+        // Equipment type suggestions
+        const equipmentTypes = ['Tractor', 'Harvester', 'Seeder', 'Sprayer', 'Cultivator', 'Leveler', 'Mulcher', 'Chopper', 'Pump', 'Irrigation', 'Planter', 'Mower', 'Loader', 'Trailer', 'Weeder'];
+        
+        // Setup autocomplete for equipment type
+        setupAutocomplete('equipment_type', 'equipmentTypeSuggestions', equipmentTypes);
+        setupAutocomplete('edit_equipment_type', 'editEquipmentTypeSuggestions', equipmentTypes);
+        
+        function setupAutocomplete(inputId, suggestionsId, dataArray) {
+            const input = document.getElementById(inputId);
+            const suggestionsDiv = document.getElementById(suggestionsId);
+            
+            input.addEventListener('input', function() {
+                const value = this.value.toLowerCase().trim();
+                if (value.length === 0) {
+                    hideSuggestions(suggestionsDiv);
+                    return;
+                }
+                const filtered = dataArray.filter(item => item.toLowerCase().includes(value));
+                showSuggestions(suggestionsDiv, filtered, input);
+            });
+            
+            input.addEventListener('blur', function() {
+                setTimeout(() => hideSuggestions(suggestionsDiv), 200);
+            });
+        }
+        
+        function showSuggestions(suggestionsDiv, items, input) {
+            if (items.length === 0) {
+                hideSuggestions(suggestionsDiv);
+                return;
+            }
+            let html = '';
+            items.forEach(item => {
+                html += `<div class="suggestion-item" onclick="selectSuggestion('${input.id}', '${item}', '${suggestionsDiv.id}')">${item}</div>`;
+            });
+            suggestionsDiv.innerHTML = html;
+            suggestionsDiv.style.display = 'block';
+        }
+        
+        function hideSuggestions(suggestionsDiv) {
+            suggestionsDiv.style.display = 'none';
+        }
+        
+        function selectSuggestion(inputId, value, suggestionsId) {
+            document.getElementById(inputId).value = value;
+            hideSuggestions(document.getElementById(suggestionsId));
+        }
+        
+        async function deleteEquipment(equipmentId, equipmentName) {
+            if (confirm(`Are you sure you want to delete "${equipmentName}"? This action cannot be undone.`)) {
+                try {
+                    const response = await fetch('/delete_equipment', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({equipment_id: equipmentId})
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert('Equipment deleted successfully!');
+                        location.reload();
+                    } else {
+                        alert('Failed to delete equipment: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Failed to delete equipment. Please try again.');
+                }
+            }
+        }
+        
+        async function editEquipment(equipmentId) {
+            try {
+                const response = await fetch(`/get_equipment/${equipmentId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const equipment = data.equipment;
+                    document.getElementById('edit_equipment_id').value = equipment.id;
+                    document.getElementById('edit_equipment_name').value = equipment.name;
+                    document.getElementById('edit_equipment_type').value = equipment.type;
+                    document.getElementById('edit_price_per_hour').value = equipment.price_per_hour;
+                    document.getElementById('edit_price_per_day').value = equipment.price_per_day;
+                    document.getElementById('edit_equipment_location').value = equipment.location;
+                    document.getElementById('edit_equipment_description').value = equipment.description || '';
+                    
+                    new bootstrap.Modal(document.getElementById('editEquipmentModal')).show();
+                } else {
+                    alert('Failed to load equipment details: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to load equipment details. Please try again.');
+            }
+        }
+        
+        async function updateEquipment() {
+            const formData = new FormData();
+            formData.append('equipment_id', document.getElementById('edit_equipment_id').value);
+            formData.append('name', document.getElementById('edit_equipment_name').value);
+            formData.append('type', document.getElementById('edit_equipment_type').value);
+            formData.append('price_per_hour', document.getElementById('edit_price_per_hour').value);
+            formData.append('price_per_day', document.getElementById('edit_price_per_day').value);
+            formData.append('location', document.getElementById('edit_equipment_location').value);
+            formData.append('description', document.getElementById('edit_equipment_description').value);
+            
+            const imageFile = document.getElementById('edit_equipment_image').files[0];
+            if (imageFile) {
+                formData.append('image', imageFile);
+            }
+            
+            if (!formData.get('name') || !formData.get('type') || !formData.get('price_per_hour') || 
+                !formData.get('price_per_day') || !formData.get('location')) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/update_equipment', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Equipment updated successfully!');
+                    bootstrap.Modal.getInstance(document.getElementById('editEquipmentModal')).hide();
+                    location.reload();
+                } else {
+                    alert('Failed to update equipment: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to update equipment. Please try again.');
+            }
+        }
+        async function addEquipment() {
+            const formData = new FormData();
+            formData.append('name', document.getElementById('equipment_name').value);
+            formData.append('type', document.getElementById('equipment_type').value);
+            formData.append('price_per_hour', document.getElementById('price_per_hour').value);
+            formData.append('price_per_day', document.getElementById('price_per_day').value);
+            formData.append('location', document.getElementById('equipment_location').value);
+            formData.append('description', document.getElementById('equipment_description').value);
+            
+            const imageFile = document.getElementById('equipment_image').files[0];
+            if (imageFile) {
+                formData.append('image', imageFile);
+            }
+            
+            // Validate required fields
+            if (!formData.get('name') || !formData.get('type') || !formData.get('price_per_hour') || 
+                !formData.get('price_per_day') || !formData.get('location')) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/add_equipment', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Equipment added successfully!');
+                    bootstrap.Modal.getInstance(document.getElementById('addEquipmentModal')).hide();
+                    location.reload();
+                } else {
+                    alert('Failed to add equipment: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to add equipment. Please try again.');
+            }
+        }
+        
+        // Auto-calculate daily price based on hourly price
+        document.getElementById('price_per_hour').addEventListener('input', function() {
+            const hourlyPrice = parseFloat(this.value) || 0;
+            const dailyPrice = hourlyPrice * 8; // 8 hours per day
+            document.getElementById('price_per_day').value = dailyPrice;
+        });
+
+        async function loadOwnerRatings() {
+            try {
+                const [transRes, ratingsRes] = await Promise.all([
+                    fetch('/api/translations/{{ current_lang }}'),
+                    fetch('/api/owner_ratings')
+                ]);
+                const tr = await transRes.json();
+                const data = await ratingsRes.json();
+                const body = document.getElementById('ownerRatingsBody');
+                const eq = data.equipment_ratings || [];
+                const recent = data.recent_reviews || [];
+                if (!eq.length) { body.innerHTML = `<p class="text-muted small mb-0">${tr.no_ratings_yet||'No ratings yet.'}</p>`; return; }
+                body.innerHTML = eq.map(e => `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="fw-bold text-truncate" style="max-width:140px">${e.equipment_name}</small>
+                        <div class="text-end">
+                            <span style="color:#ffc107;font-size:13px">${'\u2605'.repeat(Math.round(e.avg_rating||0))}${'\u2606'.repeat(5-Math.round(e.avg_rating||0))}</span>
+                            <small class="text-muted d-block">${e.avg_rating||'N/A'} (${e.total_reviews})</small>
+                        </div>
+                    </div>`).join('') +
+                (recent.length ? `<hr class="my-2"><small class="text-muted fw-bold">${tr.recent_reviews||'Recent Reviews'}</small>` +
+                    recent.slice(0,3).map(r => `
+                        <div class="mt-2 pb-2 border-bottom">
+                            <div class="d-flex justify-content-between">
+                                <small class="fw-bold">${r.farmer_name}</small>
+                                <span style="color:#ffc107;font-size:12px">${'\u2605'.repeat(r.rating)}</span>
+                            </div>
+                            <small class="text-muted">${r.equipment_name}</small><br>
+                            ${r.review_text ? `<small class="text-muted fst-italic">${r.review_text}</small>` : ''}
+                        </div>`).join('') : '');
+            } catch(e) {
+                document.getElementById('ownerRatingsBody').innerHTML = '<p class="text-muted small">Unable to load.</p>';
+            }
+        }
+    </script>
+</body>
+</html>

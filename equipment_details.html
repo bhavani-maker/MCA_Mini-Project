@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>{{ equipment.name }} - Equipment Details</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial; background: #f5f5f5; }
+        .header { background: #2e7d32; color: white; padding: 20px; }
+        .nav { display: flex; justify-content: space-between; align-items: center; max-width: 1000px; margin: 0 auto; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .back-link { color: white; text-decoration: none; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 5px; }
+        .back-link:hover { background: rgba(255,255,255,0.3); }
+        
+        .equipment-details { background: white; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); overflow: hidden; }
+        .equipment-header { background: linear-gradient(135deg, #2e7d32, #4caf50); color: white; padding: 30px; text-align: center; }
+        .equipment-name { font-size: 32px; font-weight: bold; margin-bottom: 10px; }
+        .equipment-type { background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; font-size: 16px; display: inline-block; }
+        
+        .equipment-content { padding: 30px; }
+        .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        
+        .info-section { background: #f8f9fa; padding: 25px; border-radius: 10px; border-left: 5px solid #4caf50; }
+        .section-title { font-size: 20px; color: #2e7d32; margin-bottom: 20px; font-weight: bold; }
+        .info-item { margin: 15px 0; }
+        .info-label { font-size: 14px; color: #666; text-transform: uppercase; font-weight: bold; }
+        .info-value { font-size: 18px; color: #333; margin-top: 5px; font-weight: bold; }
+        .price { color: #ff9800; font-size: 20px; }
+        
+        .availability-badge { padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: bold; display: inline-block; margin-top: 5px; }
+        .available { background: #e8f5e8; color: #2e7d32; }
+        .unavailable { background: #ffebee; color: #d32f2f; }
+        
+        .distance-info { background: #e3f2fd; color: #1976d2; padding: 15px; border-radius: 10px; text-align: center; margin: 20px 0; }
+        .distance-value { font-size: 24px; font-weight: bold; }
+        .distance-label { font-size: 14px; margin-top: 5px; }
+        
+        .specifications { margin: 20px 0; }
+        .spec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .spec-item { background: white; padding: 15px; border-radius: 8px; border: 2px solid #e0e0e0; text-align: center; }
+        .spec-label { font-size: 12px; color: #666; text-transform: uppercase; }
+        .spec-value { font-size: 16px; color: #333; font-weight: bold; margin-top: 5px; }
+        
+        .description { background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; }
+        .description-text { color: #666; line-height: 1.6; }
+        
+        .action-buttons { display: flex; gap: 15px; justify-content: center; margin-top: 30px; flex-wrap: wrap; }
+        .btn { background: #4caf50; color: white; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; text-decoration: none; display: inline-block; text-align: center; }
+        .btn:hover { background: #45a049; transform: translateY(-2px); }
+        .btn-secondary { background: #2196f3; }
+        .btn-outline { background: transparent; border: 2px solid #4caf50; color: #4caf50; }
+        .btn-outline:hover { background: #4caf50; color: white; }
+        .btn-disabled { background: #ccc; color: #666; cursor: not-allowed; }
+        
+        .owner-info { background: #e8f5e8; padding: 20px; border-radius: 10px; margin: 20px 0; }
+        .owner-name { font-size: 18px; color: #2e7d32; font-weight: bold; }
+        .owner-location { color: #666; margin-top: 5px; }
+        
+        @media (max-width: 768px) {
+            .content-grid { grid-template-columns: 1fr; }
+            .spec-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+            .action-buttons { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="nav">
+            <h1>🚜 Equipment Details</h1>
+            <a href="/nearby_equipment" class="back-link">← Back to Equipment List</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="equipment-details">
+            <div class="equipment-header">
+                <div class="equipment-name">{{ equipment.name }}</div>
+                <div class="equipment-type">{{ equipment.type }}</div>
+            </div>
+            
+            <div class="equipment-content">
+                <div class="distance-info">
+                    <div class="distance-value">📍 {{ equipment.distance }} km</div>
+                    <div class="distance-label">Distance from your location</div>
+                </div>
+                
+                <div class="content-grid">
+                    <div class="info-section">
+                        <div class="section-title">💰 Pricing Information</div>
+                        <div class="info-item">
+                            <div class="info-label">Hourly Rate</div>
+                            <div class="info-value price">₹{{ equipment.hourly_rate }}/hour</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Daily Rate</div>
+                            <div class="info-value price">₹{{ equipment.daily_rate }}/day</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Availability</div>
+                            <div class="availability-badge {{ 'available' if equipment.available else 'unavailable' }}">
+                                {{ 'Available Now' if equipment.available else 'Not Available' }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <div class="section-title">👤 Owner Information</div>
+                        <div class="owner-info">
+                            <div class="owner-name">{{ equipment.owner }}</div>
+                            <div class="owner-location">📍 {{ equipment.location }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Contact</div>
+                            <div class="info-value">+91 98765 43210</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Rating</div>
+                            <div class="info-value">⭐ 4.8/5 (24 reviews)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="specifications">
+                    <div class="section-title">🔧 Technical Specifications</div>
+                    <div class="spec-grid">
+                        {% for spec, value in equipment.specifications.items() %}
+                        <div class="spec-item">
+                            <div class="spec-label">{{ spec }}</div>
+                            <div class="spec-value">{{ value }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="description">
+                    <div class="section-title">📝 Description</div>
+                    <div class="description-text">{{ equipment.description }}</div>
+                </div>
+                
+                <div class="action-buttons">
+                    {% if equipment.available %}
+                        <a href="/book/{{ equipment.name.lower().replace(' ', '_') }}" class="btn">📅 Book Now</a>
+                        <a href="/cost_calculator" class="btn btn-secondary">💰 Calculate Cost</a>
+                    {% else %}
+                        <button class="btn btn-disabled" disabled>📅 Not Available</button>
+                    {% endif %}
+                    <button class="btn btn-outline" onclick="alert('Contact owner feature coming soon!')">📞 Contact Owner</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate="admin_dashboard_title">Admin Dashboard - Krushi Rent AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="{{ url_for('static', filename='js/krushi-translations.js') }}"></script>
+    <style>
+        body { background: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar { background: linear-gradient(135deg, #2c3e50, #34495e) !important; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .card { border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 10px; }
+        .card-header { background: linear-gradient(135deg, #007bff, #0056b3); color: white; border-radius: 10px 10px 0 0 !important; }
+        .stats-card { background: linear-gradient(135deg, #28a745, #20c997); color: white; text-align: center; padding: 2rem; border-radius: 10px; margin-bottom: 1rem; }
+        .stats-number { font-size: 2.5rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-shield-alt me-2"></i><span data-translate="admin_dashboard_title">Admin Dashboard</span>
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link text-white" href="{{ url_for('admin_reports') }}">
+                    <i class="fas fa-chart-line me-1"></i><span data-translate="reports">Reports</span>
+                </a>
+                <span class="navbar-text me-3"><span data-translate="welcome">Welcome</span>, {{ session.user_name }}!</span>
+                <a class="btn btn-outline-light btn-sm" href="{{ url_for('index') }}">
+                    <i class="fas fa-sign-out-alt me-1"></i><span data-translate="logout">Logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stats-number">{{ users|length }}</div>
+                    <div data-translate="total_users">Total Users</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stats-number">{{ equipment|length }}</div>
+                    <div data-translate="total_equipment">Total Equipment</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stats-number">{{ bookings|length }}</div>
+                    <div data-translate="total_bookings">Total Bookings</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ML Demand Prediction -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-brain me-2"></i><span data-translate="ml_demand_prediction">ML Demand Prediction</span></h5>
+                <button class="btn btn-light btn-sm" onclick="loadDemandPrediction()">
+                    <i class="fas fa-sync-alt me-1"></i><span data-translate="refresh">Refresh</span>
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="demandLoading" class="text-center py-3">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted" data-translate="running_ml_model">Running ML model...</p>
+                </div>
+                <div id="demandContent" style="display:none">
+                    <div class="row mb-3" id="demandCards"></div>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <canvas id="demandChart" height="120"></canvas>
+                        </div>
+                        <div class="col-md-4">
+                            <canvas id="demandPieChart" height="120"></canvas>
+                        </div>
+                    </div>
+                    <div class="mt-3" id="demandDetailSection" style="display:none">
+                        <h6 class="text-muted" id="demandDetailTitle">30-Day Forecast</h6>
+                        <canvas id="demandDetailChart" height="80"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-users me-2"></i><span data-translate="users_management">Users Management</span></h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th data-translate="id">ID</th>
+                                <th data-translate="username">Username</th>
+                                <th data-translate="name">Name</th>
+                                <th data-translate="user_type">User Type</th>
+                                <th data-translate="phone">Phone</th>
+                                <th data-translate="location">Location</th>
+                                <th data-translate="created">Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.name }}</td>
+                                <td>
+                                    <span class="badge bg-{% if user.user_type == 'admin' %}danger{% elif user.user_type == 'owner' %}primary{% else %}success{% endif %}">
+                                        <span data-translate="{{ user.user_type }}">{{ user.user_type.title() }}</span>
+                                    </span>
+                                </td>
+                                <td>{{ user.phone or 'N/A' }}</td>
+                                <td>{{ user.location or 'N/A' }}</td>
+                                <td>{{ user.created_at }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Equipment Table -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-cogs me-2"></i><span data-translate="equipment_management">Equipment Management</span></h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th data-translate="id">ID</th>
+                                <th data-translate="name">Name</th>
+                                <th data-translate="type">Type</th>
+                                <th data-translate="price_per_hour">Price/Hour</th>
+                                <th data-translate="price_per_day">Price/Day</th>
+                                <th data-translate="location">Location</th>
+                                <th data-translate="available">Available</th>
+                                <th data-translate="owner_id">Owner ID</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for eq in equipment %}
+                            <tr>
+                                <td>{{ eq.id }}</td>
+                                <td>{{ eq.name }}</td>
+                                <td>{{ eq.type }}</td>
+                                <td>₹{{ eq.price_per_hour }}</td>
+                                <td>₹{{ eq.price_per_day }}</td>
+                                <td>{{ eq.location }}</td>
+                                <td>
+                                    <span class="badge bg-{% if eq.available %}success{% else %}danger{% endif %}">
+                                        {% if eq.available %}Available{% else %}Unavailable{% endif %}
+                                    </span>
+                                </td>
+                                <td>{{ eq.owner_id }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bookings Table -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i><span data-translate="bookings_management">Bookings Management</span></h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th data-translate="booking_id">Booking ID</th>
+                                <th data-translate="equipment_id">Equipment ID</th>
+                                <th data-translate="farmer_id">Farmer ID</th>
+                                <th data-translate="date">Date</th>
+                                <th data-translate="duration">Duration</th>
+                                <th data-translate="amount">Amount</th>
+                                <th data-translate="status">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in bookings %}
+                            <tr>
+                                <td>{{ booking.booking_id }}</td>
+                                <td>{{ booking.equipment_id }}</td>
+                                <td>{{ booking.farmer_id }}</td>
+                                <td>{{ booking.booking_date }}</td>
+                                <td>{{ booking.duration_hours }}h</td>
+                                <td>₹{{ booking.total_amount }}</td>
+                                <td><span class="badge bg-success">{{ booking.status }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Chart.js FIRST, then Bootstrap, then our script -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/language-sync.js') }}"></script>
+
+    <script>
+        const CURRENT_LANG = '{{ current_lang }}';
+        let demandChartInst, demandPieInst, demandDetailInst;
+        let demandData = [];
+
+        // Translate static elements
+        function applyTranslations(tr) {
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.getAttribute('data-translate');
+                if (tr[key]) el.textContent = tr[key];
+            });
+        }
+
+        function _t(key, fallback) {
+            return (window._tr && window._tr[key]) || fallback;
+        }
+
+        async function loadDemandPrediction() {
+            document.getElementById('demandLoading').style.display = 'block';
+            document.getElementById('demandContent').style.display = 'none';
+            try {
+                const [transRes, demandRes] = await Promise.all([
+                    fetch('/api/translations/' + CURRENT_LANG),
+                    fetch('/api/demand-prediction')
+                ]);
+                window._tr = await transRes.json();
+                applyTranslations(window._tr);
+                const json = await demandRes.json();
+                if (!json.success) throw new Error(json.error || 'Failed');
+                demandData = json.data;
+                renderDemandCards(demandData);
+                renderDemandChart(demandData);
+                renderDemandPie(demandData);
+                document.getElementById('demandLoading').style.display = 'none';
+                document.getElementById('demandContent').style.display = 'block';
+            } catch(e) {
+                document.getElementById('demandLoading').innerHTML =
+                    `<p class="text-danger"><i class="fas fa-exclamation-circle me-1"></i>${e.message}</p>`;
+            }
+        }
+
+        function renderDemandCards(data) {
+            const colors = { High:'danger', Medium:'warning', Low:'success', Rising:'info', Falling:'secondary', Stable:'primary' };
+            document.getElementById('demandCards').innerHTML = data.slice(0, 6).map(d => `
+                <div class="col-md-4 col-sm-6 mb-3">
+                    <div class="card border-0 shadow-sm h-100" style="cursor:pointer" onclick="loadDetail('${d.equipment_type}')">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h6 class="mb-1">${d.equipment_type}</h6>
+                                <span class="badge bg-${colors[d.demand_level]||'secondary'}">${_t(d.demand_level.toLowerCase(), d.demand_level)}</span>
+                            </div>
+                            <div class="text-muted small">Avg: <strong>${d.avg_daily_bookings} ${_t('avg_bookings_day','bookings/day')}</strong></div>
+                            <div class="text-muted small">${_t('peak_day','Peak')}: ${d.peak_day} (${d.peak_bookings})</div>
+                            <div class="mt-1">
+                                <span class="badge bg-${colors[d.trend]||'secondary'} bg-opacity-75">
+                                    <i class="fas fa-${d.trend==='Rising'?'arrow-up':d.trend==='Falling'?'arrow-down':'minus'} me-1"></i>${_t(d.trend.toLowerCase(), d.trend)}
+                                </span>
+                                <small class="text-muted ms-2">${d.historical_bookings} ${_t('historical','historical')}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>`).join('');
+        }
+
+        function renderDemandChart(data) {
+            if (demandChartInst) demandChartInst.destroy();
+            const ctx = document.getElementById('demandChart').getContext('2d');
+            demandChartInst = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.equipment_type),
+                    datasets: [{
+                        label: _t('avg_bookings_day','Bookings/Day'),
+                        data: data.map(d => d.avg_daily_bookings),
+                        backgroundColor: data.map(d =>
+                            d.demand_level==='High' ? 'rgba(220,53,69,0.7)' :
+                            d.demand_level==='Medium' ? 'rgba(255,193,7,0.7)' : 'rgba(40,167,69,0.7)'),
+                        borderRadius: 6
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false },
+                        title: { display: true, text: _t('avg_demand_chart','7-Day Average Demand by Equipment Type') } },
+                    scales: { y: { beginAtZero: true, title: { display: true, text: _t('avg_bookings_day','Bookings/Day') } } }
+                }
+            });
+        }
+
+        function renderDemandPie(data) {
+            if (demandPieInst) demandPieInst.destroy();
+            const ctx = document.getElementById('demandPieChart').getContext('2d');
+            demandPieInst = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(d => d.equipment_type),
+                    datasets: [{ data: data.map(d => d.avg_daily_bookings),
+                        backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40','#C9CBCF','#7BC8A4'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false,
+                    plugins: { title: { display: true, text: _t('demand_share','Demand Share') } } }
+            });
+        }
+
+        async function loadDetail(equipmentType) {
+            document.getElementById('demandDetailTitle').textContent = _t('day_forecast','30-Day Forecast') + ': ' + equipmentType;
+            document.getElementById('demandDetailSection').style.display = 'block';
+            try {
+                const res = await fetch('/api/demand-prediction/' + encodeURIComponent(equipmentType));
+                const json = await res.json();
+                if (!json.success) return;
+                if (demandDetailInst) demandDetailInst.destroy();
+                const ctx = document.getElementById('demandDetailChart').getContext('2d');
+                demandDetailInst = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: json.daily.map(d => d.date),
+                        datasets: [{
+                            label: _t('avg_bookings_day','Bookings/Day'),
+                            data: json.daily.map(d => d.predicted_bookings),
+                            borderColor: '#007bff', backgroundColor: 'rgba(0,123,255,0.1)',
+                            borderWidth: 2, fill: true, tension: 0.4, pointRadius: 2
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, title: { display: true, text: _t('avg_bookings_day','Bookings/Day') } } }
+                    }
+                });
+                document.getElementById('demandDetailSection').scrollIntoView({ behavior: 'smooth' });
+            } catch(e) { console.error(e); }
+        }
+
+        // Run after everything is loaded
+        window.addEventListener('load', function() {
+            loadDemandPrediction();
+        });
+    </script>
+</body>
+</html>

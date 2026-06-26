@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - KrushiRent AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="{{ url_for('static', filename='js/krushi-translations.js') }}"></script>
+    <style>
+        .payment-card { border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .payment-method { cursor: pointer; border: 2px solid #e9ecef; border-radius: 8px; padding: 15px; margin: 10px 0; }
+        .payment-method.active { border-color: #28a745; background-color: #f8fff9; }
+        .payment-details { display: none; margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; }
+        .payment-details.show { display: block; }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card payment-card">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="fas fa-credit-card me-2"></i><span data-translate="payment_details">Payment Details</span></h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h5 data-translate="booking_summary">Booking Summary</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong><span data-translate="equipment">Equipment</span>:</strong> {{ booking.equipment_name }}</p>
+                                    <p><strong><span data-translate="booking_id">Booking ID</span>:</strong> {{ booking.booking_id }}</p>
+                                    <p><strong><span data-translate="duration">Duration</span>:</strong> {{ booking.duration_hours }} <span data-translate="hours">hours</span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong><span data-translate="date">Date</span>:</strong> {{ booking.booking_date }}</p>
+                                    <p><strong><span data-translate="location">Location</span>:</strong> {{ booking.location }}</p>
+                                    <h4 class="text-success"><strong><span data-translate="total">Total</span>: ₹{{ booking.total_amount }}</strong></h4>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form id="paymentForm" method="POST">
+                            <input type="hidden" name="booking_id" value="{{ booking.booking_id }}">
+                            <input type="hidden" name="amount" value="{{ booking.total_amount }}">
+
+                            <h5 data-translate="select_payment_method">Select Payment Method</h5>
+                            
+                            <div class="payment-method" onclick="selectPayment('UPI')">
+                                <input type="radio" name="payment_method" value="UPI" id="upi" class="me-2">
+                                <label for="upi"><strong data-translate="upi_payment">UPI Payment</strong> - <span data-translate="pay_using_upi">Pay using UPI ID</span></label>
+                                <div id="upi-details" class="payment-details">
+                                    <div class="mb-3">
+                                        <label class="form-label" data-translate="upi_id">UPI ID</label>
+                                        <input type="text" class="form-control" name="upi_id" placeholder="yourname@paytm">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="payment-method" onclick="selectPayment('CARD')">
+                                <input type="radio" name="payment_method" value="CARD" id="card" class="me-2">
+                                <label for="card"><strong data-translate="card_payment">Debit/Credit Card</strong> - <span data-translate="pay_using_card">Pay using card</span></label>
+                                <div id="card-details" class="payment-details">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label" data-translate="card_number">Card Number</label>
+                                            <input type="text" class="form-control" name="card_number" placeholder="1234 5678 9012 3456">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label" data-translate="cardholder_name">Cardholder Name</label>
+                                            <input type="text" class="form-control" name="card_name" placeholder="John Doe">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label" data-translate="expiry">Expiry</label>
+                                            <input type="text" class="form-control" name="card_expiry" placeholder="MM/YY">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label" data-translate="cvv">CVV</label>
+                                            <input type="text" class="form-control" name="card_cvv" placeholder="123">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label" data-translate="otp">OTP</label>
+                                            <input type="text" class="form-control" name="otp" placeholder="123456">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="payment-method" onclick="selectPayment('COD')">
+                                <input type="radio" name="payment_method" value="COD" id="cod" class="me-2">
+                                <label for="cod"><strong data-translate="cod_payment">Cash on Delivery</strong> - <span data-translate="pay_on_delivery">Pay when equipment arrives</span></label>
+                                <div id="cod-details" class="payment-details">
+                                    <div class="mb-3">
+                                        <label class="form-label" data-translate="delivery_address">Delivery Address</label>
+                                        <textarea class="form-control" name="cod_address" rows="3" placeholder="Enter full address"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label" data-translate="mobile_number">Mobile Number</label>
+                                        <input type="text" class="form-control" name="cod_mobile" placeholder="9876543210">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-success btn-lg w-100 mt-3">
+                                <i class="fas fa-lock me-2"></i><span data-translate="pay_now">Pay Now</span> - ₹{{ booking.total_amount }}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const savedLang = localStorage.getItem('user_language') || '{{ current_lang }}' || 'en';
+        
+        window.addEventListener('DOMContentLoaded', function() {
+            translatePage(savedLang);
+        });
+        
+        function selectPayment(method) {
+            document.querySelectorAll('.payment-details').forEach(el => el.classList.remove('show'));
+            document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(method.toLowerCase() + '-details').classList.add('show');
+            document.querySelector(`input[value="${method}"]`).checked = true;
+            document.querySelector(`input[value="${method}"]`).closest('.payment-method').classList.add('active');
+        }
+    </script>
+</body>
+</html>

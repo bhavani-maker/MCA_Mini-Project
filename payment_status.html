@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment {{ status.title() }} - KrushiRent AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .status-card { border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .success-icon { color: #28a745; font-size: 4rem; }
+        .pending-icon { color: #ffc107; font-size: 4rem; }
+        .failed-icon { color: #dc3545; font-size: 4rem; }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card status-card text-center">
+                    <div class="card-body p-5">
+                        {% if status == 'success' %}
+                            <i class="fas fa-check-circle success-icon mb-3"></i>
+                            <h2 class="text-success" data-translate="payment_successful">Payment Successful!</h2>
+                            <p class="lead" data-translate="payment_success_msg">Your payment has been processed successfully.</p>
+                        {% elif status == 'pending' %}
+                            <i class="fas fa-clock pending-icon mb-3"></i>
+                            <h2 class="text-warning" data-translate="payment_pending">Payment Pending</h2>
+                            <p class="lead" data-translate="payment_pending_msg">Your order is confirmed. Payment will be collected on delivery.</p>
+                        {% else %}
+                            <i class="fas fa-times-circle failed-icon mb-3"></i>
+                            <h2 class="text-danger" data-translate="payment_failed">Payment Failed</h2>
+                            <p class="lead" data-translate="payment_failed_msg">{{ message or 'Payment could not be processed. Please try again.' }}</p>
+                        {% endif %}
+                        
+                        <div class="mt-4">
+                            <p><strong data-translate="booking_id">Booking ID</strong>: {{ booking_id }}</p>
+                            <p><strong data-translate="amount">Amount</strong>: ₹{{ amount }}</p>
+                            {% if transaction_id %}
+                            <p><strong data-translate="transaction_id">Transaction ID</strong>: {{ transaction_id }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mt-4">
+                            {% if status == 'success' or status == 'pending' %}
+                            <a href="{{ url_for('receipt', booking_id=booking_id) }}" class="btn btn-success me-2">
+                                <i class="fas fa-receipt me-2"></i><span data-translate="view_receipt">View Receipt</span>
+                            </a>
+                            <a href="{{ url_for('download_receipt', booking_id=booking_id) }}" class="btn btn-primary me-2">
+                                <i class="fas fa-download me-2"></i><span data-translate="download_receipt">Download Receipt</span>
+                            </a>
+                            {% endif %}
+                            <a href="{{ url_for('farmer_dashboard') }}" class="btn btn-primary me-2">
+                                <i class="fas fa-home me-2"></i><span data-translate="dashboard">Dashboard</span>
+                            </a>
+                            {% if status == 'failed' %}
+                            <a href="{{ url_for('payment_page', booking_id=booking_id) }}" class="btn btn-success">
+                                <i class="fas fa-redo me-2"></i><span data-translate="try_again">Try Again</span>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                payment_successful: 'Payment Successful!',
+                payment_success_msg: 'Your payment has been processed successfully.',
+                payment_pending: 'Payment Pending',
+                payment_pending_msg: 'Your order is confirmed. Payment will be collected on delivery.',
+                payment_failed: 'Payment Failed',
+                payment_failed_msg: 'Payment could not be processed. Please try again.',
+                booking_id: 'Booking ID',
+                amount: 'Amount',
+                transaction_id: 'Transaction ID',
+                view_receipt: 'View Receipt',
+                download_receipt: 'Download Receipt',
+                dashboard: 'Dashboard',
+                try_again: 'Try Again'
+            },
+            hi: {
+                payment_successful: 'भुगतान सफल!',
+                payment_success_msg: 'आपका भुगतान सफलतापूर्वक संसाधित किया गया है।',
+                payment_pending: 'भुगतान लंबित',
+                payment_pending_msg: 'आपका ऑर्डर कन्फर्म हो गया है। डिलीवरी पर भुगतान एकत्र किया जाएगा।',
+                payment_failed: 'भुगतान विफल',
+                payment_failed_msg: 'भुगतान संसाधित नहीं किया जा सका। कृपया पुनः प्रयास करें।',
+                booking_id: 'बुकिंग ID',
+                amount: 'राशि',
+                transaction_id: 'लेनदेन ID',
+                view_receipt: 'रसीद देखें',
+                download_receipt: 'रसीद डाउनलोड करें',
+                dashboard: 'डैशबोर्ड',
+                try_again: 'पुनः प्रयास करें'
+            },
+            kn: {
+                payment_successful: 'ಪಾವತಿ ಯಶಸ್ವಿಯಾಗಿದೆ!',
+                payment_success_msg: 'ನಿಮ್ಮ ಪಾವತಿಯನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲಾಗಿದೆ.',
+                payment_pending: 'ಪಾವತಿ ಬಾಕಿ ಇದೆ',
+                payment_pending_msg: 'ನಿಮ್ಮ ಆರ್ಡರ್ ದೃಢೀಕರಿಸಲಾಗಿದೆ. ಡೆಲಿವರಿಯಲ್ಲಿ ಪಾವತಿಯನ್ನು ಸಂಗ್ರಹಿಸಲಾಗುತ್ತದೆ.',
+                payment_failed: 'ಪಾವತಿ ವಿಫಲವಾಗಿದೆ',
+                payment_failed_msg: 'ಪಾವತಿಯನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+                booking_id: 'ಬುಕಿಂಗ್ ID',
+                amount: 'ಮೊತ್ತ',
+                transaction_id: 'ವಹಿವಾಟು ID',
+                view_receipt: 'ರಸೀದಿ ವೀಕ್ಷಿಸಿ',
+                download_receipt: 'ರಸೀದಿ ಡೌನ್ಲೋಡ್',
+                dashboard: 'ಡ್ಯಾಶ್ಬೋರ್ಡ್',
+                try_again: 'ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ'
+            },
+            ta: {
+                payment_successful: 'பணம் செலுத்தல் வெற்றிகரமாக!',
+                payment_success_msg: 'உங்கள் பணம் செலுத்தல் வெற்றிகரமாக செயல்படுத்தப்பட்டது.',
+                payment_pending: 'பணம் செலுத்தல் நிலுவையில்',
+                payment_pending_msg: 'உங்கள் ஆர்டர் உறுதிப்படுத்தப்பட்டது. டெலிவரியில் பணம் சேகரிக்கப்படும்.',
+                payment_failed: 'பணம் செலுத்தல் தோல்வி',
+                payment_failed_msg: 'பணம் செலுத்தலை செயல்படுத்த முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
+                booking_id: 'பதிவு ID',
+                amount: 'தொகை',
+                transaction_id: 'பரிவர்த்தனை ID',
+                view_receipt: 'ரசீதை பார்க்கவும்',
+                download_receipt: 'ரசீதை பதிவிறக்கவும்',
+                dashboard: 'டாஷ்போர்டு',
+                try_again: 'மீண்டும் முயற்சிக்கவும்'
+            },
+            te: {
+                payment_successful: 'చెల్లింపు విజయవంతం!',
+                payment_success_msg: 'మీ చెల్లింపు విజయవంతంగా ప్రాసెస్ చేయబడింది.',
+                payment_pending: 'చెల్లింపు పెండింగ్',
+                payment_pending_msg: 'మీ ఆర్డర్ నిర్ధారించబడింది. డెలివరీలో చెల్లింపు సేకరించబడుతుంది.',
+                payment_failed: 'చెల్లింపు విఫలమైంది',
+                payment_failed_msg: 'చెల్లింపును ప్రాసెస్ చేయడం సాధ్యం కాలేదు. దయచేసి మళ్లీ ప్రయత్నించండి.',
+                booking_id: 'బుకింగ్ ID',
+                amount: 'మొత్తం',
+                transaction_id: 'లావాదేవీ ID',
+                view_receipt: 'రసీదు చూడండి',
+                download_receipt: 'రసీదు డౌన్లోడ్',
+                dashboard: 'డ్యాష్బోర్డ్',
+                try_again: 'మళ్లీ ప్రయత్నించండి'
+            }
+        };
+
+        function translatePage(lang) {
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.getAttribute('data-translate');
+                if (translations[lang] && translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedLang = localStorage.getItem('user_language') || 'en';
+            translatePage(savedLang);
+        });
+    </script>
+</body>
+</html>

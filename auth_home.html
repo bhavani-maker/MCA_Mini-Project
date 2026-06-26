@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>Krushi Rent AI : Intelligent Agricultural Rental Service - Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            background: linear-gradient(rgba(27, 94, 32, 0.5), rgba(46, 125, 50, 0.6)), 
+                        url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        
+        .header { 
+            background: none;
+            color: white; 
+            padding: 30px 20px; 
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+        
+        .header p {
+            font-size: 1.3em;
+            color: #ffffff;
+            margin: 0;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+        }
+        
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        
+        .hero { 
+            background: #eef7ea !important;
+            padding: 30px; 
+            border-radius: 16px; 
+            text-align: center; 
+            margin: 20px 0;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+        }
+        
+        .hero h2 {
+            font-size: 2em;
+            color: #1b5e20;
+            margin-bottom: 15px;
+        }
+        
+        .hero p {
+            color: #424242;
+            margin-bottom: 20px;
+        }
+        
+        .user-types { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 40px; 
+            margin: 30px 0;
+        }
+        
+        .user-card { 
+            background: #eef7ea !important;
+            padding: 30px; 
+            border-radius: 16px; 
+            text-align: center; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .user-card:hover { 
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+        
+        .user-card h3 {
+            font-size: 1.5em;
+            color: #1b5e20;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .user-card h3 i {
+            font-size: 1.2em;
+        }
+        
+        .farmer-card h3 i {
+            color: #2e7d32;
+        }
+        
+        .owner-card h3 i {
+            color: #1976d2;
+        }
+        
+        .admin-card h3 i {
+            color: #424242;
+        }
+        
+        .user-card p {
+            color: #555;
+            margin-bottom: 20px;
+        }
+        
+        .btn { 
+            background-color: #2e7d32;
+            color: white; 
+            padding: 12px 24px; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            display: inline-block;
+            margin: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover { 
+            background-color: #1b5e20;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: #1976d2;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #0d47a1;
+        }
+        
+        @media (max-width: 768px) {
+            .header { padding: 25px 20px; }
+            .header h1 { font-size: 36px; }
+            .user-types { grid-template-columns: 1fr; gap: 30px; }
+        }
+        
+        /* FORCE OVERRIDE ALL WHITE BACKGROUNDS */
+        .hero, .user-card, .farmer-card, .owner-card, .admin-card {
+            background-color: #eef7ea !important;
+            background: #eef7ea !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚜 Krushi Rent AI <span style="color: white; font-weight: bold;">: Intelligent Agricultural Rental Service</span></h1>
+        <p>AI-Powered Equipment Recommendations for Modern Farming</p>
+    </div>
+    
+    <div class="container">
+        <div class="hero">
+            <h2>Choose Your Login Type</h2>
+            <p>Select your role to access the appropriate dashboard</p>
+        </div>
+        
+        <div class="user-types">
+            <div class="user-card farmer-card">
+                <h3><i class="fas fa-tractor"></i>Farmer Login</h3>
+                <p>Get AI recommendations, book equipment, and manage rentals</p>
+                <a href="/login/farmer" class="btn">Login</a>
+                <a href="/register/farmer" class="btn btn-secondary">Register</a>
+            </div>
+            
+            <div class="user-card owner-card">
+                <h3><i class="fas fa-cogs"></i>Equipment Owner</h3>
+                <p>List your equipment, manage bookings, and track earnings</p>
+                <a href="/login/owner" class="btn">Login</a>
+                <a href="/register/owner" class="btn btn-secondary">Register</a>
+            </div>
+            
+            <div class="user-card admin-card">
+                <h3><i class="fas fa-shield-alt"></i>Admin Login</h3>
+                <p>Manage users, monitor system, and view analytics</p>
+                <a href="/login/admin" class="btn">Admin Login</a>
+                <p><small>Default: admin / admin123</small></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>Book {{ equipment }} - Agricultural Rental</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial; background: #f5f5f5; }
+        .header { background: #2e7d32; color: white; padding: 20px; }
+        .nav { display: flex; justify-content: space-between; align-items: center; max-width: 800px; margin: 0 auto; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .booking-card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .equipment-info { background: #e8f5e8; padding: 20px; border-radius: 8px; margin-bottom: 25px; text-align: center; }
+        .equipment-name { font-size: 24px; color: #2e7d32; margin-bottom: 10px; }
+        .hourly-rate { font-size: 18px; color: #ff9800; font-weight: bold; }
+        .form-group { margin: 20px 0; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+        input, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 5px; font-size: 16px; }
+        input:focus, select:focus { outline: none; border-color: #4caf50; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .cost-summary { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .cost-row { display: flex; justify-content: space-between; margin: 10px 0; }
+        .total-cost { font-size: 20px; font-weight: bold; color: #2e7d32; border-top: 2px solid #ddd; padding-top: 10px; }
+        .btn { background: #4caf50; color: white; padding: 15px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .payment-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            display: none;
+        }
+        .payment-success { background: #4caf50; }
+        .payment-error { background: #f44336; }
+        .payment-processing { background: #ff9800; }
+        .form-actions { display: flex; gap: 15px; margin-top: 30px; }
+        .back-link { color: white; text-decoration: none; }
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+            .form-actions { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="nav">
+            <h1>📅 Book Equipment</h1>
+            <a href="/farmer_dashboard" class="back-link">← Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="booking-card">
+            <div class="equipment-info">
+                <div class="equipment-name">🚜 {{ equipment }}</div>
+                <div class="hourly-rate">₹{{ hourly_rate }}/hour</div>
+            </div>
+            
+            <form method="POST" action="/confirm_booking">
+                <input type="hidden" name="equipment" value="{{ equipment }}">
+                <input type="hidden" name="hourly_rate" value="{{ hourly_rate }}">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="booking_date">Booking Date:</label>
+                        <input type="date" id="booking_date" name="booking_date" required 
+                               onchange="updateCost()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="booking_time">Start Time:</label>
+                        <input type="time" id="booking_time" name="booking_time" required 
+                               value="09:00" onchange="updateCost()">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="rental_duration">Rental Duration (Hours):</label>
+                    <select id="rental_duration" name="rental_duration" required onchange="updateCost()">
+                        <option value="2">2 hours</option>
+                        <option value="4">4 hours</option>
+                        <option value="6">6 hours</option>
+                        <option value="8" selected>8 hours (Full Day)</option>
+                        <option value="12">12 hours</option>
+                        <option value="24">24 hours</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="delivery_address"><span data-translate="delivery_address">Delivery Address</span>: *</label>
+                    <textarea id="delivery_address" name="delivery_address" required 
+                              style="min-height: 80px; resize: vertical;" 
+                              data-translate-placeholder="delivery_address_placeholder"
+                              placeholder="Enter complete address where equipment should be delivered"></textarea>
+                    <small style="color: #666; font-size: 14px;" data-translate="delivery_address_help">Owner will use this address to deliver the equipment</small>
+                </div>
+                
+                <div class="cost-summary">
+                    <h3>Cost Summary</h3>
+                    <div class="cost-row">
+                        <span>Hourly Rate:</span>
+                        <span>₹{{ hourly_rate }}/hour</span>
+                    </div>
+                    <div class="cost-row">
+                        <span>Duration:</span>
+                        <span id="duration-display">8 hours</span>
+                    </div>
+                    <div class="cost-row total-cost">
+                        <span>Total Amount:</span>
+                        <span id="total-amount">₹{{ hourly_rate * 8 }}</span>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="paymentBtn" class="btn" onclick="confirmCODBooking()">💵 Confirm Booking (Cash on Delivery)</button>
+                    <a href="/farmer_dashboard" class="btn btn-secondary" style="text-align: center; text-decoration: none; display: block; line-height: 1.2;">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        function updateCost() {
+            const hourlyRate = {{ hourly_rate }};
+            const duration = parseInt(document.getElementById('rental_duration').value);
+            const totalAmount = hourlyRate * duration;
+            
+            document.getElementById('duration-display').textContent = duration + ' hours';
+            document.getElementById('total-amount').textContent = '₹' + totalAmount;
+        }
+        
+        // Set minimum date to today and default value
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('booking_date');
+            dateInput.min = today;
+            dateInput.value = today;
+            updateCost();
+        });
+    </script>
+    
+    <!-- Payment Status Notifications -->
+    <div id="paymentStatus" class="payment-status"></div>
+    
+    <script>
+        function updateCost() {
+            const hourlyRate = {{ hourly_rate }};
+            const duration = parseInt(document.getElementById('rental_duration').value);
+            const totalAmount = hourlyRate * duration;
+            
+            document.getElementById('duration-display').textContent = duration + ' hours';
+            document.getElementById('total-amount').textContent = '₹' + totalAmount;
+        }
+        
+        function showPaymentStatus(message, type) {
+            const statusDiv = document.getElementById('paymentStatus');
+            statusDiv.textContent = message;
+            statusDiv.className = 'payment-status payment-' + type;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        function confirmCODBooking() {
+            const paymentBtn = document.getElementById('paymentBtn');
+            paymentBtn.disabled = true;
+            paymentBtn.textContent = 'Processing...';
+            
+            showPaymentStatus('Confirming booking...', 'processing');
+            
+            const bookingData = {
+                equipment: document.querySelector('input[name="equipment"]').value,
+                booking_date: document.getElementById('booking_date').value,
+                booking_time: document.getElementById('booking_time').value,
+                rental_duration: document.getElementById('rental_duration').value,
+                delivery_address: document.getElementById('delivery_address').value,
+                hourly_rate: document.querySelector('input[name="hourly_rate"]').value,
+                total_amount: parseInt(document.getElementById('total-amount').textContent.replace('₹', ''))
+            };
+            
+            fetch('/confirm_cod_booking', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(bookingData)
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    throw new Error('Please login to confirm booking');
+                }
+                if (response.status === 403) {
+                    throw new Error('Only farmers can book equipment');
+                }
+                if (response.status === 409) {
+                    throw new Error('Equipment already booked for this time slot');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                if (data.status === 'success') {
+                    showPaymentStatus(data.message, 'success');
+                    setTimeout(() => {
+                        window.location.href = data.redirect_url || '/farmer_dashboard';
+                    }, 1500);
+                } else {
+                    throw new Error('Booking confirmation failed');
+                }
+            })
+            .catch(error => {
+                paymentBtn.disabled = false;
+                paymentBtn.textContent = '💵 Confirm Booking (Cash on Delivery)';
+                
+                // Handle specific authentication errors
+                if (error.message.includes('login')) {
+                    showPaymentStatus('Please login to continue', 'error');
+                    setTimeout(() => {
+                        window.location.href = '/login/farmer';
+                    }, 2000);
+                } else {
+                    showPaymentStatus('Error: ' + error.message, 'error');
+                }
+            });
+        }
+        
+        // Set minimum date to today and default value
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('booking_date');
+            dateInput.min = today;
+            dateInput.value = today;
+            updateCost();
+        });
+    </script>
+    
+    <script>
+        const translations = {
+            en: { delivery_address: 'Delivery Address', delivery_address_placeholder: 'Enter complete address where equipment should be delivered', delivery_address_help: 'Owner will use this address to deliver the equipment' },
+            te: { delivery_address: 'డెలివరీ చిరునామా', delivery_address_placeholder: 'పరికరాన్ని డెలివరీ చేయవలసిన పూర్తి చిరునామా నమోదు చేయండి', delivery_address_help: 'యజమాని పరికరాన్ని డెలివరీ చేయడానికి ఈ చిరునామాను ఉపయోగిస్తారు' },
+            kn: { delivery_address: 'ವಿತರಣಾ ವಿಳಾಸ', delivery_address_placeholder: 'ಉಪಕರಣವನ್ನು ವಿತರಿಸಬೇಕಾದ ಸಂಪೂರ್ಣ ವಿಳಾಸವನ್ನು ನಮೂದಿಸಿ', delivery_address_help: 'ಉಪಕರಣವನ್ನು ವಿತರಿಸಲು ಮಾಲೀಕರು ಈ ವಿಳಾಸವನ್ನು ಬಳಸುತ್ತಾರೆ' },
+            hi: { delivery_address: 'डिलीवरी पता', delivery_address_placeholder: 'उपकरण डिलीवर करने के लिए पूरा पता दर्ज करें', delivery_address_help: 'मालिक उपकरण डिलीवर करने के लिए इस पते का उपयोग करेगा' },
+            ta: { delivery_address: 'விநியோக முகவரி', delivery_address_placeholder: 'உபகரணத்தை வழங்க வேண்டிய முழு முகவரியை உள்ளிடவும்', delivery_address_help: 'உபகரணத்தை வழங்க உரிமையாளர் இந்த முகவரியைப் பயன்படுத்துவார்' }
+        };
+        
+        function translatePage() {
+            const lang = localStorage.getItem('user_language') || 'en';
+            const trans = translations[lang] || translations.en;
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.getAttribute('data-translate');
+                if (trans[key]) el.textContent = trans[key];
+            });
+            document.querySelectorAll('[data-translate-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-translate-placeholder');
+                if (trans[key]) el.placeholder = trans[key];
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', translatePage);
+    </script>
+</body>
+</html>

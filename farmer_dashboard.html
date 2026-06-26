@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ text.page_title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="{{ url_for('static', filename='js/krushi-translations.js') }}"></script>
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #2c3e50, #34495e) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .card {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: box-shadow 0.2s ease;
+            background: white;
+        }
+        
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border-radius: 8px 8px 0 0 !important;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            border-bottom: none;
+        }
+        
+        .card-body {
+            padding: 1rem;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #218838, #1ea080);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 6px;
+            border: 1px solid #ced4da;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .recommendation-card {
+            border-left: 4px solid #007bff;
+            margin-bottom: 1rem;
+        }
+        
+        .booking-card {
+            border-left: 4px solid #28a745;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        .stats-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        /* Fixed Equipment Image Styles - NO LOADING ISSUES */
+        .equipment-img {
+            width: 120px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            display: block;
+            transition: none !important;
+            animation: none !important;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+        
+        .equipment-img:hover {
+            transform: none !important;
+            transition: none !important;
+        }
+        
+        /* Equipment Card Stability */
+        .equipment-card {
+            transition: box-shadow 0.2s ease !important;
+            will-change: auto;
+        }
+        
+        .equipment-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+            transform: none !important;
+        }
+        
+        /* Prevent Layout Shifts */
+        .equipment-container {
+            min-height: 100px;
+        }
+        
+        /* Loading state prevention */
+        .equipment-img[src=""], .equipment-img:not([src]) {
+            background-image: url('/static/images/equipment/default.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        /* AI Badge Styles */
+        .ai-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .match-high { background: linear-gradient(135deg, #28a745, #20c997) !important; }
+        .match-medium { background: linear-gradient(135deg, #ffc107, #fd7e14) !important; }
+        .match-good { background: linear-gradient(135deg, #17a2b8, #6f42c1) !important; }
+        
+        /* Language dropdown styling */
+        .dropdown-menu {
+            min-width: 150px;
+        }
+        
+        .dropdown-item {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-seedling me-2"></i><span>{{ text.krushi_farmer }}</span>
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link text-white me-3" href="{{ url_for('rental_service') }}">
+                    <i class="fas fa-store me-1"></i><span>{{ text.rental_service }}</span>
+                </a>
+                <a class="nav-link text-white me-3" href="{{ url_for('my_bookings') }}">
+                    <i class="fas fa-calendar-check me-1"></i>My Bookings
+                </a>
+                
+                <!-- Language Selector Dropdown -->
+                <div class="dropdown me-3">
+                    <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-globe me-1"></i><span id="currentLangText">{{ current_lang|upper }}</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                        <li><a class="dropdown-item" href="#" onclick="switchLanguage('en'); return false;">English (EN)</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="switchLanguage('hi'); return false;">हिंदी (HI)</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="switchLanguage('kn'); return false;">ಕನ್ನಡ (KN)</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="switchLanguage('ta'); return false;">தமிழ் (TA)</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="switchLanguage('te'); return false;">తెలుగు (TE)</a></li>
+                    </ul>
+                </div>
+                
+                <span class="navbar-text me-3">
+                    <i class="fas fa-user me-2"></i>{{ text.welcome }}, {{ session.user_name }}
+                </span>
+                <a class="btn btn-outline-light btn-sm" href="{{ url_for('logout') }}">
+                    <i class="fas fa-sign-out-alt me-2"></i><span>{{ text.logout }}</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- AI Recommendations Section -->
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-brain me-2"></i>{{ text.ai_reco }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="recommendationForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ text.farming_stage }}</label>
+                                    <select class="form-select" id="farming_stage" required>
+                                        <option value="">{% if current_lang == 'te' %}వ్యవసాయ దశను ఎంచుకోండి{% elif current_lang == 'hi' %}कृषि चरण चुनें{% elif current_lang == 'kn' %}ಕೃಷಿ ಹಂತವನ್ನು ಆಯ್ಕೆಮಾಡಿ{% elif current_lang == 'ta' %}விவசாய நிலையைத் தேர்ந்தெடுக்கவும்{% else %}Select Farming Stage{% endif %}</option>
+                                        <option value="land_preparation">{% if current_lang == 'te' %}భూమి తయారీ{% elif current_lang == 'hi' %}भूमि तैयारी{% elif current_lang == 'kn' %}ಭೂಮಿ ತಯಾರಿಕೆ{% elif current_lang == 'ta' %}நில தயாரிப்பு{% else %}Land Preparation{% endif %}</option>
+                                        <option value="sowing">{% if current_lang == 'te' %}విత్తనం{% elif current_lang == 'hi' %}बुवाई{% elif current_lang == 'kn' %}ಬಿತ್ತನೆ{% elif current_lang == 'ta' %}விதைப்பு{% else %}Sowing/Planting{% endif %}</option>
+                                        <option value="irrigation">{% if current_lang == 'te' %}నీటిపారుదల{% elif current_lang == 'hi' %}सिंचाई{% elif current_lang == 'kn' %}ನೀರಾವರಿ{% elif current_lang == 'ta' %}நீர்ப்பாசனம்{% else %}Irrigation{% endif %}</option>
+                                        <option value="maintenance">{% if current_lang == 'te' %}పంట నిర్వహణ{% elif current_lang == 'hi' %}फसल रखरखाव{% elif current_lang == 'kn' %}ಬೆಳೆ ನಿರ್ವಹಣೆ{% elif current_lang == 'ta' %}பயிர் பராமரிப்பு{% else %}Crop Maintenance{% endif %}</option>
+                                        <option value="harvesting">{% if current_lang == 'te' %}కోత{% elif current_lang == 'hi' %}कटाई{% elif current_lang == 'kn' %}ಕೊಯ್ಲು{% elif current_lang == 'ta' %}அறுவடை{% else %}Harvesting{% endif %}</option>
+                                        <option value="post_harvest">{% if current_lang == 'te' %}కోత తర్వాత ప్రాసెసింగ్{% elif current_lang == 'hi' %}कटाई के बाद प्रसंस्करण{% elif current_lang == 'kn' %}ಕೊಯ್ಲು ನಂತರದ ಸಂಸ್ಕರಣೆ{% elif current_lang == 'ta' %}அறுவடைக்குப் பிந்தைய செயலாக்கம்{% else %}Post-Harvest Processing{% endif %}</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ text.crop_category }}</label>
+                                    <select class="form-select" id="crop_category" required>
+                                        <option value="">{% if current_lang == 'te' %}పంట వర్గాన్ని ఎంచుకోండి{% elif current_lang == 'hi' %}फसल श्रेणी चुनें{% elif current_lang == 'kn' %}ಬೆಳೆ ವರ್ಗವನ್ನು ಆಯ್ಕೆಮಾಡಿ{% elif current_lang == 'ta' %}பயிர் வகையைத் தேர்ந்தெடுக்கவும்{% else %}Select Crop Category{% endif %}</option>
+                                        <option value="cereal">{% if current_lang == 'te' %}ధాన్యం పంటలు{% elif current_lang == 'hi' %}अनाज फसलें{% elif current_lang == 'kn' %}ಧಾನ್ಯ ಬೆಳೆಗಳು{% elif current_lang == 'ta' %}தானிய பயிர்கள்{% else %}Cereal Crops{% endif %}</option>
+                                        <option value="vegetable">{% if current_lang == 'te' %}కూరగాయల పంటలు{% elif current_lang == 'hi' %}सब्जी फसलें{% elif current_lang == 'kn' %}ತರಕಾರಿ ಬೆಳೆಗಳು{% elif current_lang == 'ta' %}காய்கறி பயிர்கள்{% else %}Vegetable Crops{% endif %}</option>
+                                        <option value="fruit">{% if current_lang == 'te' %}పండ్ల పంటలు{% elif current_lang == 'hi' %}फल फसलें{% elif current_lang == 'kn' %}ಹಣ್ಣಿನ ಬೆಳೆಗಳು{% elif current_lang == 'ta' %}பழ பயிர்கள்{% else %}Fruit Crops{% endif %}</option>
+                                        <option value="cash_crop">{% if current_lang == 'te' %}నగదు పంటలు{% elif current_lang == 'hi' %}नकदी फसलें{% elif current_lang == 'kn' %}ನಗದು ಬೆಳೆಗಳು{% elif current_lang == 'ta' %}பண பயிர்கள்{% else %}Cash Crops{% endif %}</option>
+                                        <option value="pulse">{% if current_lang == 'te' %}పప్పు పంటలు{% elif current_lang == 'hi' %}दलहन फसलें{% elif current_lang == 'kn' %}ದ್ವಿದಳ ಧಾನ್ಯ ಬೆಳೆಗಳು{% elif current_lang == 'ta' %}பருப்பு பயிர்கள்{% else %}Pulse Crops{% endif %}</option>
+                                        <option value="spice">{% if current_lang == 'te' %}మసాలా పంటలు{% elif current_lang == 'hi' %}मसाला फसलें{% elif current_lang == 'kn' %}ಮಸಾಲೆ ಬೆಳೆಗಳು{% elif current_lang == 'ta' %}மசாலா பயிர்கள்{% else %}Spice Crops{% endif %}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ text.farm_size }}</label>
+                                    <select class="form-select" id="farm_size" required>
+                                        <option value="">{{ text.select_farm_size }}</option>
+                                        <option value="small">{{ text.small_farm }}</option>
+                                        <option value="medium">{{ text.medium_farm }}</option>
+                                        <option value="large">{{ text.large_farm }}</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ text.season }}</label>
+                                    <select class="form-select" id="season" required>
+                                        <option value="">{{ text.select_season }}</option>
+                                        <option value="kharif">{{ text.kharif }}</option>
+                                        <option value="rabi">{{ text.rabi }}</option>
+                                        <option value="summer">{{ text.summer }}</option>
+                                        <option value="year_round">{{ text.year_round }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ text.budget }}</label>
+                                    <select class="form-select" id="budget_range" required>
+                                        <option value="">{{ text.select_budget }}</option>
+                                        <option value="low">{{ text.low_budget }}</option>
+                                        <option value="medium">{{ text.medium_budget }}</option>
+                                        <option value="high">{{ text.high_budget }}</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">{{ text.urgency }}</label>
+                                    <select class="form-select" id="urgency" required>
+                                        <option value="">{{ text.select_urgency }}</option>
+                                        <option value="immediate">{{ text.immediate }}</option>
+                                        <option value="this_week">{{ text.this_week }}</option>
+                                        <option value="flexible">{{ text.flexible }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success mt-3">
+                                <i class="fas fa-brain me-2"></i>{{ text.get_reco }}
+                            </button>
+                        </form>
+                        
+                        <div id="recommendations" class="mt-4"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="col-lg-4">
+                <div class="card stats-card mb-4">
+                    <div class="card-body">
+                        <div class="stats-number">{{ bookings|length }}</div>
+                        <div>{{ text.total_bookings }}</div>
+                    </div>
+                </div>
+
+                <!-- My Reviews -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-star me-2"></i><span data-translate="my_reviews">My Reviews</span></h6>
+                    </div>
+                    <div class="card-body" id="myReviewsBody">
+                        <div class="text-center text-muted small">Loading...</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-clock me-2"></i>{{ text.recent_bookings }}</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if bookings %}
+                            {% for booking in bookings %}
+                            <div class="booking-card card mb-2">
+                                <div class="card-body p-3">
+                                    <h6 class="card-title mb-1">{{ booking.equipment_display_name }}</h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>{{ booking.booking_date }}<br>
+                                        <i class="fas fa-rupee-sign me-1"></i>₹{{ booking.total_amount }}
+                                    </small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">{{ text.no_bookings }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div class="modal fade" id="bookingModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Book Equipment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="bookingForm">
+                        <input type="hidden" id="equipment_id">
+                        <div class="mb-3">
+                            <label class="form-label" id="labelEquipment">Equipment</label>
+                            <input type="text" class="form-control" id="equipment_name" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" id="labelBookingDate">Booking Date</label>
+                            <input type="date" class="form-control" id="booking_date" placeholder="dd-mm-yyyy" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" id="labelDuration">Duration (hours)</label>
+                            <input type="number" class="form-control" id="duration_hours" min="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" id="labelDeliveryAddress">Delivery Address</label>
+                            <textarea class="form-control" id="delivery_address" rows="2" required placeholder="Enter complete address for equipment delivery"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" id="labelTotalAmount">Total Amount</label>
+                            <input type="text" class="form-control" id="total_amount" readonly>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btnCancel" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="btnConfirm" onclick="confirmBooking()">Confirm Booking</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/modal_translate.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ai_translate.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/language-sync.js') }}"></script>
+    <script>
+        const USER_LANG = '{{ current_lang }}';
+        
+        // Initialize translations when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTranslations();
+            applyAITranslations(USER_LANG);
+            initModalTranslations();
+            loadMyReviews();
+            const modalElement = document.getElementById('bookingModal');
+            if (modalElement) {
+                modalElement.addEventListener('show.bs.modal', function() {
+                    if (typeof translateModal === 'function') {
+                        translateModal();
+                    }
+                });
+            }
+        });
+        
+        // Enhanced AI Recommendations with chat interface
+        document.getElementById('recommendationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            const container = document.getElementById('recommendations');
+            
+            try {
+                // Show loading state
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>AI is analyzing your needs...';
+                submitBtn.disabled = true;
+                
+                // Clear previous results
+                container.innerHTML = '<div class="text-center py-4"><i class="fas fa-brain fa-spin fa-2x text-success mb-3"></i><br><strong>AI is finding the best equipment for you...</strong></div>';
+                
+                // Collect form data
+                const formData = {
+                    farming_stage: document.getElementById('farming_stage').value,
+                    crop_category: document.getElementById('crop_category').value,
+                    farm_size: document.getElementById('farm_size').value,
+                    season: document.getElementById('season').value,
+                    budget_range: document.getElementById('budget_range').value,
+                    urgency: document.getElementById('urgency').value
+                };
+                
+                // Validation
+                const missingFields = [];
+                Object.keys(formData).forEach(key => {
+                    if (!formData[key]) {
+                        missingFields.push(key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()));
+                    }
+                });
+                
+                if (missingFields.length > 0) {
+                    throw new Error(`Please select: ${missingFields.join(', ')}`);
+                }
+                
+                // Make API request
+                console.log('Making API request to /get_ai_recommendations');
+                const response = await fetch('/get_ai_recommendations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const responseText = await response.text();
+                console.log('Raw response:', responseText);
+                
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('JSON parse error:', parseError);
+                    throw new Error(`Server returned invalid JSON. Response: ${responseText.substring(0, 200)}...`);
+                }
+                
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || 'Failed to get AI recommendations');
+                }
+                
+                // Display recommendations
+                displayAIRecommendations(data.data || [], data.message);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Error:</strong> ${error.message}
+                        <br><small class="text-muted mt-2 d-block">Please check your selections and try again.</small>
+                    </div>
+                `;
+            } finally {
+                // Reset button state
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+        
+        // Language change function
+        async function switchLanguage(lang) {
+            try {
+                // Update backend session
+                const response = await fetch('/set-language/' + lang);
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update dropdown text
+                    document.getElementById('currentLangText').textContent = lang.toUpperCase();
+                    
+                    // Load new translations
+                    await loadTranslations(lang);
+                    
+                    // Update modal translations
+                    if (typeof changeModalLanguage === 'function') {
+                        await changeModalLanguage(lang);
+                    }
+                    
+                    // Re-render AI recommendations if they exist
+                    const recoContainer = document.getElementById('recommendations');
+                    if (recoContainer && recoContainer.children.length > 0) {
+                        // Get current recommendations from DOM
+                        const cards = recoContainer.querySelectorAll('.equipment-card');
+                        if (cards.length > 0) {
+                            // Trigger form resubmit to get fresh translations
+                            const form = document.getElementById('recommendationForm');
+                            if (form && form.checkValidity()) {
+                                form.dispatchEvent(new Event('submit'));
+                            }
+                        }
+                    }
+                    
+                    // Store in localStorage for persistence
+                    localStorage.setItem('user_language', lang);
+                    
+                    console.log('Language switched to:', lang);
+                }
+            } catch (error) {
+                console.error('Language switch error:', error);
+            }
+        }
+        
+        async function displayAIRecommendations(recommendations, message = '') {
+            const container = document.getElementById('recommendations');
+            
+            console.log('API Response:', recommendations);
+            
+            // Load translations for current language
+            const userLang = USER_LANG || 'en';
+            await loadTranslations(userLang);
+            
+            if (!recommendations || recommendations.length === 0) {
+                const noEquipText = translateAI('No equipment available', userLang);
+                const tryAdjustText = translateAI('Try adjusting', userLang);
+                container.innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>${noEquipText}</strong><br>
+                        ${tryAdjustText}
+                    </div>
+                `;
+                return;
+            }
+            
+            const aiRecoEquipText = translateAI('AI Recommended Equipment', userLang);
+            
+            let html = `
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0"><i class="fas fa-robot me-2 text-success"></i>${aiRecoEquipText}</h6>
+                    <small class="text-success"><i class="fas fa-check-circle me-1"></i>${message}</small>
+                </div>
+            `;
+            
+            recommendations.forEach((equipment, index) => {
+                const imageUrl = equipment?.image_url || '/static/images/default.png';
+                
+                // AI confidence levels with translation
+                const confidenceLevel = index === 0 ? 'High' : index === 1 ? 'Medium' : 'Good';
+                const confidenceTrans = translateAI(confidenceLevel, userLang);
+                const confidenceClass = index === 0 ? 'match-high' : index === 1 ? 'match-medium' : 'match-good';
+                const confidenceIcon = index === 0 ? 'fas fa-star' : index === 1 ? 'fas fa-thumbs-up' : 'fas fa-check';
+                
+                // Translate UI labels
+                const aiMatchLabel = translateAI('AI Match', userLang);
+                const bookNowLabel = translateAI('Book Now', userLang);
+                const aiRecommendedLabel = translateAI('AI Recommended', userLang);
+                const perDayLabel = translateAI('per day', userLang);
+                
+                html += `
+                    <div class="card mb-3 border-0 shadow-sm position-relative equipment-card" data-equipment-id="${equipment.id || 0}">
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge ${confidenceClass} ai-badge">
+                                <i class="${confidenceIcon} me-1"></i>${aiMatchLabel}: ${confidenceTrans}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row align-items-center equipment-container">
+                                <div class="col-md-3">
+                                    <img src="${imageUrl}" 
+                                         class="equipment-img" 
+                                         alt="${equipment.name || 'Equipment'}"
+                                         loading="eager"
+                                         onerror="this.src='/static/images/default.png'; this.onerror=null;">
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="card-title mb-2">
+                                        ${equipment.name_en || equipment.name || 'Equipment'}
+                                        ${equipment.name_local ? `(${equipment.name_local})` : ''}
+                                        <small class="text-muted">(${equipment.type || 'Type'})</small>
+                                    </h6>
+                                    <p class="text-muted mb-2">${equipment.match_reason || 'Recommended equipment'}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-map-marker-alt me-1"></i>${equipment.location || 'Location'} | 
+                                        <i class="fas fa-rupee-sign me-1"></i>₹${equipment.price_per_hour || 0}/${translateAI('per hour', userLang)} | 
+                                        <i class="fas fa-calendar-day me-1"></i>₹${equipment.price_per_day || 0}/${perDayLabel}
+                                    </small>
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-success btn-sm" 
+                                                onclick="openBookingModal(${equipment.id || 0}, '${equipment.name || 'Equipment'}', ${equipment.price_per_hour || 0})">
+                                            <i class="fas fa-calendar-plus me-1"></i>${bookNowLabel}
+                                        </button>
+                                        <small class="text-success fw-bold">
+                                            <i class="fas fa-robot text-success"></i> ${aiRecommendedLabel}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        function openBookingModal(equipmentId, equipmentName, pricePerHour) {
+            document.getElementById('equipment_id').value = equipmentId;
+            document.getElementById('equipment_name').value = equipmentName;
+            
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('booking_date').min = today;
+            
+            // Calculate total amount when duration changes
+            document.getElementById('duration_hours').addEventListener('input', function() {
+                const hours = this.value;
+                const total = hours * pricePerHour;
+                document.getElementById('total_amount').value = '₹' + total;
+            });
+            
+            // Translate modal before showing
+            if (typeof translateModal === 'function') {
+                translateModal();
+            }
+            
+            new bootstrap.Modal(document.getElementById('bookingModal')).show();
+        }
+        
+        async function loadMyReviews() {
+            try {
+                const res = await fetch('/api/my_reviews');
+                const reviews = await res.json();
+                const body = document.getElementById('myReviewsBody');
+                if (!reviews.length) {
+                    body.innerHTML = '<p class="text-muted small mb-0">No reviews yet. Rate your bookings!</p>';
+                    return;
+                }
+                body.innerHTML = reviews.slice(0, 3).map(r => `
+                    <div class="mb-2 pb-2 border-bottom">
+                        <div class="d-flex justify-content-between">
+                            <small class="fw-bold">${r.equipment_name}</small>
+                            <span style="color:#ffc107">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+                        </div>
+                        ${r.review_text ? `<small class="text-muted">${r.review_text}</small>` : ''}
+                    </div>`).join('');
+            } catch(e) {
+                document.getElementById('myReviewsBody').innerHTML = '<p class="text-muted small">Unable to load reviews.</p>';
+            }
+        }
+
+        async function confirmBooking() {
+            const bookingData = {
+                equipment_id: document.getElementById('equipment_id').value,
+                booking_date: document.getElementById('booking_date').value,
+                duration_hours: document.getElementById('duration_hours').value,
+                delivery_address: document.getElementById('delivery_address').value
+            };
+            
+            try {
+                const response = await fetch('/book_equipment', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(bookingData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('bookingModal')).hide();
+                    // Redirect to payment page
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert('Booking failed: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Booking failed. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>Booking Confirmed - Agricultural Rental</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial; background: #f5f5f5; }
+        .header { background: #2e7d32; color: white; padding: 20px; text-align: center; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .confirmation-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); text-align: center; margin: 30px 0; }
+        .success-icon { font-size: 80px; color: #4caf50; margin-bottom: 20px; }
+        .confirmation-title { font-size: 28px; color: #2e7d32; margin-bottom: 15px; font-weight: bold; }
+        .confirmation-message { font-size: 18px; color: #666; margin-bottom: 30px; }
+        .booking-details { background: #f8f9fa; padding: 30px; border-radius: 10px; margin: 30px 0; text-align: left; }
+        .details-title { font-size: 20px; color: #2e7d32; margin-bottom: 20px; font-weight: bold; text-align: center; }
+        .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .detail-item { padding: 15px; background: white; border-radius: 8px; border-left: 4px solid #4caf50; }
+        .detail-label { font-size: 12px; color: #666; text-transform: uppercase; font-weight: bold; }
+        .detail-value { font-size: 16px; color: #333; margin-top: 8px; font-weight: bold; }
+        .total-amount { font-size: 20px; color: #ff9800; }
+        .payment-status { padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: bold; display: inline-block; margin-top: 5px; }
+        .status-pending { background: #fff3e0; color: #f57c00; }
+        .status-paid { background: #e8f5e8; color: #2e7d32; }
+        .action-buttons { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 30px; }
+        .btn { background: #4caf50; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold; border: none; cursor: pointer; transition: all 0.3s; }
+        .btn:hover { background: #45a049; transform: translateY(-2px); }
+        .btn-secondary { background: #2196f3; }
+        .btn-outline { background: transparent; border: 2px solid #4caf50; color: #4caf50; }
+        .btn-outline:hover { background: #4caf50; color: white; }
+        .back-link { display: inline-block; margin-top: 20px; color: #2e7d32; text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+        @media (max-width: 768px) {
+            .details-grid { grid-template-columns: 1fr; }
+            .action-buttons { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌾 Agricultural Equipment Rental</h1>
+    </div>
+    
+    <div class="container">
+        <div class="confirmation-card">
+            <div class="success-icon">✅</div>
+            <div class="confirmation-title">Booking Confirmed!</div>
+            <div class="confirmation-message">
+                Your equipment booking has been successfully confirmed.<br>
+                {% if booking.payment_method == 'COD' %}
+                Please pay <strong>₹{{ booking.total_amount }}</strong> in cash after service delivery.
+                {% else %}
+                Payment has been processed successfully.
+                {% endif %}
+            </div>
+            
+            <div class="booking-details">
+                <div class="details-title">📋 Booking Details</div>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">Booking ID</div>
+                        <div class="detail-value">{{ booking.booking_id }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Equipment</div>
+                        <div class="detail-value">{{ booking.equipment_name }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Farmer</div>
+                        <div class="detail-value">{{ booking.farmer }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Booking Date</div>
+                        <div class="detail-value">{{ booking.booking_date }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Start Time</div>
+                        <div class="detail-value">{{ booking.booking_time }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Duration</div>
+                        <div class="detail-value">{{ booking.rental_duration }} hours</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Hourly Rate</div>
+                        <div class="detail-value">₹{{ booking.hourly_rate }}/hour</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Total Amount</div>
+                        <div class="detail-value total-amount">₹{{ booking.total_amount }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Payment Method</div>
+                        <div class="detail-value">{{ booking.payment_method or 'COD' }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Payment Status</div>
+                        <div class="payment-status {{ 'status-paid' if booking.payment_status == 'SUCCESS' else 'status-pending' }}">
+                            {% if booking.payment_status == 'PENDING' %}
+                                Pay on Delivery
+                            {% else %}
+                                {{ booking.payment_status }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="/download-receipt/{{ booking.booking_id }}" class="btn">📄 Download Receipt</a>
+                <button class="btn btn-secondary" onclick="viewBookingDetails('{{ booking.booking_id }}')">📋 View Full Details</button>
+                <a href="/farmer_dashboard" class="btn btn-outline">🏠 Go to Dashboard</a>
+            </div>
+            
+            <a href="/farmer_dashboard" class="back-link">← Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <script>
+        function viewBookingDetails(bookingId) {
+            // Redirect to dashboard with booking details
+            window.location.href = '/farmer_dashboard#booking-' + bookingId;
+        }
+    </script>
+</body>
+</html>

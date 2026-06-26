@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>My Profile - Agricultural Rental</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial; background: #f5f5f5; }
+        .header { background: #2e7d32; color: white; padding: 20px; }
+        .nav { display: flex; justify-content: space-between; align-items: center; max-width: 800px; margin: 0 auto; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .back-link { color: white; text-decoration: none; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 5px; }
+        .back-link:hover { background: rgba(255,255,255,0.3); }
+        
+        .profile-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); margin: 20px 0; }
+        .page-title { font-size: 28px; color: #2e7d32; margin-bottom: 10px; text-align: center; }
+        .page-subtitle { color: #666; text-align: center; margin-bottom: 30px; }
+        
+        .profile-header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e0e0e0; }
+        .profile-avatar { width: 80px; height: 80px; background: #4caf50; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 32px; color: white; }
+        .profile-name { font-size: 24px; color: #2e7d32; font-weight: bold; }
+        .profile-type { background: #e8f5e8; color: #2e7d32; padding: 6px 12px; border-radius: 15px; font-size: 14px; margin-top: 10px; display: inline-block; }
+        
+        .profile-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .detail-section { background: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 4px solid #4caf50; }
+        .section-title { font-size: 18px; color: #2e7d32; margin-bottom: 15px; font-weight: bold; }
+        .detail-item { margin: 10px 0; }
+        .detail-label { font-size: 14px; color: #666; text-transform: uppercase; font-weight: bold; }
+        .detail-value { font-size: 16px; color: #333; margin-top: 5px; font-weight: bold; }
+        
+        .form-group { margin: 20px 0; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+        input, textarea { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; }
+        input:focus, textarea:focus { outline: none; border-color: #4caf50; box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1); }
+        textarea { resize: vertical; min-height: 100px; }
+        
+        .btn { background: #4caf50; color: white; padding: 15px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; text-decoration: none; display: inline-block; text-align: center; }
+        .btn:hover { background: #45a049; transform: translateY(-2px); }
+        .btn-secondary { background: #2196f3; }
+        .btn-outline { background: transparent; border: 2px solid #4caf50; color: #4caf50; }
+        .btn-outline:hover { background: #4caf50; color: white; }
+        
+        .action-buttons { display: flex; gap: 15px; justify-content: center; margin-top: 30px; flex-wrap: wrap; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin: 20px 0; }
+        .stat-card { background: white; padding: 20px; border-radius: 10px; text-align: center; border: 2px solid #e0e0e0; }
+        .stat-number { font-size: 24px; font-weight: bold; color: #2e7d32; }
+        .stat-label { font-size: 14px; color: #666; margin-top: 5px; }
+        
+        @media (max-width: 768px) {
+            .profile-details { grid-template-columns: 1fr; }
+            .action-buttons { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="nav">
+            <h1>👤 My Profile</h1>
+            <a href="/farmer_dashboard" class="back-link">← Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="profile-card">
+            <div class="page-title">User Profile</div>
+            <div class="page-subtitle">Manage your account information and preferences</div>
+            
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    {% if user_type == 'farmer' %}👨‍🌾
+                    {% elif user_type == 'owner' %}👨‍💼
+                    {% else %}👨‍💻{% endif %}
+                </div>
+                <div class="profile-name">{{ user_data.name or session['user'] }}</div>
+                <div class="profile-type">{{ user_type.title() }}</div>
+            </div>
+            
+            {% if user_type == 'farmer' %}
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">5</div>
+                    <div class="stat-label">Total Bookings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">₹12,500</div>
+                    <div class="stat-label">Total Spent</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">4.8</div>
+                    <div class="stat-label">Rating</div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="profile-details">
+                <div class="detail-section">
+                    <div class="section-title">📋 Account Information</div>
+                    <div class="detail-item">
+                        <div class="detail-label">Username</div>
+                        <div class="detail-value">{{ session['user'] }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Full Name</div>
+                        <div class="detail-value">{{ user_data.name or 'Not provided' }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Account Type</div>
+                        <div class="detail-value">{{ user_type.title() }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Member Since</div>
+                        <div class="detail-value">
+                            {% if user_data.created_at %}
+                                {{ user_data.created_at[:10] }}
+                            {% else %}
+                                Not available
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <div class="section-title">📞 Contact Information</div>
+                    <div class="detail-item">
+                        <div class="detail-label">Phone Number</div>
+                        <div class="detail-value">{{ user_data.phone or 'Not provided' }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Location</div>
+                        <div class="detail-value">{{ user_data.location or 'Not provided' }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Email</div>
+                        <div class="detail-value">{{ session['user'] }}@example.com</div>
+                    </div>
+                </div>
+            </div>
+            
+            <form method="POST" action="/update_profile">
+                <div class="section-title">✏️ Update Profile Information</div>
+                
+                <div class="form-group">
+                    <label for="name">Full Name:</label>
+                    <input type="text" id="name" name="name" value="{{ user_data.name or '' }}" placeholder="Enter your full name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number:</label>
+                    <input type="tel" id="phone" name="phone" value="{{ user_data.phone or '' }}" placeholder="Enter your phone number">
+                </div>
+                
+                <div class="form-group">
+                    <label for="location">Location:</label>
+                    <input type="text" id="location" name="location" value="{{ user_data.location or '' }}" placeholder="Enter your city/village">
+                </div>
+                
+                {% if user_type == 'farmer' %}
+                <div class="form-group">
+                    <label for="farm_size">Farm Size (acres):</label>
+                    <input type="number" id="farm_size" name="farm_size" value="{{ user_data.farm_size or '' }}" placeholder="Enter farm size in acres">
+                </div>
+                
+                <div class="form-group">
+                    <label for="crops">Primary Crops:</label>
+                    <textarea id="crops" name="crops" placeholder="List your primary crops (e.g., Rice, Wheat, Cotton)">{{ user_data.crops or '' }}</textarea>
+                </div>
+                {% endif %}
+                
+                <div class="action-buttons">
+                    <button type="submit" class="btn">💾 Update Profile</button>
+                    <button type="button" class="btn btn-secondary" onclick="alert('Password change feature coming soon!')">🔒 Change Password</button>
+                    <a href="/farmer_dashboard" class="btn btn-outline">❌ Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

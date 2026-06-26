@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>Equipment Recommendations - Smart Agricultural Rental</title>
+    <style>
+        body { font-family: Arial; margin: 0; background: #f5f5f5; }
+        .header { background: #2e7d32; color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .summary { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .equipment-card { 
+            background: white; 
+            padding: 0; 
+            border-radius: 10px; 
+            margin: 15px 0; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            overflow: hidden;
+        }
+        .equipment-image { 
+            width: 150px; 
+            height: 120px; 
+            object-fit: cover; 
+            background: #f0f0f0;
+            flex-shrink: 0;
+            display: block;
+            border: none;
+        }
+        .equipment-image-placeholder {
+            width: 150px;
+            height: 120px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #999;
+            flex-shrink: 0;
+        }
+        .card-content { 
+            padding: 20px; 
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .equipment-info h3 { 
+            margin: 0 0 8px 0; 
+            color: #2e7d32; 
+            font-size: 18px;
+        }
+        .equipment-info p { 
+            margin: 4px 0; 
+            color: #666; 
+            font-size: 14px;
+        }
+        .price-section {
+            text-align: right;
+            margin-right: 20px;
+        }
+        .hourly-price { 
+            font-size: 20px; 
+            font-weight: bold; 
+            color: #ff9800; 
+            margin-bottom: 8px;
+        }
+        .daily-price {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .availability-badge { 
+            padding: 6px 12px; 
+            border-radius: 15px; 
+            font-size: 12px; 
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        .available { 
+            background: #e8f5e8; 
+            color: #2e7d32; 
+        }
+        .unavailable { 
+            background: #ffebee; 
+            color: #c62828; 
+        }
+        .btn { 
+            background: #4caf50; 
+            color: white; 
+            padding: 10px 20px; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover { background: #45a049; }
+        .btn:disabled { 
+            background: #ccc; 
+            cursor: not-allowed; 
+        }
+        .back-link { color: white; text-decoration: none; }
+        .no-results { text-align: center; padding: 40px; background: white; border-radius: 10px; }
+        .source-badge {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-left: 10px;
+        }
+        @media (max-width: 768px) {
+            .equipment-card {
+                flex-direction: column;
+            }
+            .equipment-image {
+                width: 100%;
+                height: 150px;
+            }
+            .card-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .price-section {
+                margin-right: 0;
+                margin-top: 15px;
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 AI Equipment Recommendations</h1>
+        <a href="/farmer_dashboard" class="back-link">← Dashboard</a>
+    </div>
+    
+    <div class="container">
+        <div class="summary">
+            <h2>Recommendations for {{ crop.title() }}</h2>
+            <p><strong>Activity:</strong> {{ activity.title() }} | <strong>Land Area:</strong> {{ land_area }} acres</p>
+        </div>
+        
+        {% if recommendations %}
+            {% for equipment in recommendations %}
+            <div class="equipment-card">
+                {% if equipment.image and equipment.image != 'default_equipment.jpg' %}
+                    <img src="{{ url_for('static', filename='images/' + equipment.image) }}" 
+                         alt="{{ equipment.name }}" 
+                         class="equipment-image"
+                         loading="lazy"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="equipment-image-placeholder" style="display: none;">
+                        🚜
+                    </div>
+                {% else %}
+                    <div class="equipment-image-placeholder">
+                        🚜
+                    </div>
+                {% endif %}
+                <div class="card-content">
+                    <div class="equipment-info">
+                        <h3>{{ equipment.name }}
+                            <span class="source-badge">{{ equipment.source }}</span>
+                        </h3>
+                        <p><strong>Suitable for:</strong> {{ equipment.suitable_for|join(', ') }}</p>
+                        <p><strong>Recommendation Score:</strong> {{ equipment.recommendation_score }}%</p>
+                    </div>
+                    
+                    <div class="price-section">
+                        <div class="hourly-price">₹{{ equipment.price_per_hour }}/hour</div>
+                        <div class="daily-price">₹{{ equipment.cost_per_day }}/day</div>
+                        
+                        <div class="availability-badge {{ 'available' if equipment.available else 'unavailable' }}">
+                            {{ 'Available' if equipment.available else 'Not Available' }}
+                        </div>
+                        
+                        {% if equipment.available %}
+                            <a href="/book/{{ equipment.name }}" class="btn">📅 Book Now</a>
+                        {% else %}
+                            <button class="btn" disabled>Currently Unavailable</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-results">
+                <h3>No equipment recommendations found</h3>
+                <p>Try adjusting your search criteria</p>
+                <a href="/recommend" class="btn">Try Again</a>
+            </div>
+        {% endif %}
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="/recommend" class="btn" style="background: #2196f3;">🔄 New Recommendation</a>
+            <a href="/farmer_dashboard" class="btn" style="background: #6c757d;">← Back to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

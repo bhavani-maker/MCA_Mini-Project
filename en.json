@@ -1,0 +1,17 @@
+{
+  "title": "Krushi Rent AI",
+  "subtitle": "Intelligent Agricultural Rental Service",
+  "hero_subtitle": "Empowering Farmers with Smart Equipment Rental Solutions",
+  "farmer_title": "Farmer Login",
+  "farmer_desc": "Rent agricultural equipment at affordable prices",
+  "owner_title": "Equipment Owner",
+  "owner_desc": "List your equipment and earn extra income",
+  "admin_title": "Admin Login",
+  "admin_desc": "Manage platform operations and users",
+  "login": "Login",
+  "register": "Register",
+  "chat_welcome": "Hello! I'm Krushi AI. How can I help you today?",
+  "chat_placeholder": "Type your message...",
+  "add_new_equipment": "Add New Equipment",
+  "edit_equipment": "Edit Equipment"
+}

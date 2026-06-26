@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Krushi Rent AI : Intelligent Agricultural Rental Service</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                        url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .language-widget {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            z-index: 999;
+            background: white;
+            border-radius: 50px;
+            padding: 0.5rem 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .language-widget:hover {
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .language-widget i {
+            color: #28a745;
+            font-size: 1.2rem;
+        }
+        
+        .language-selector {
+            border: none;
+            background: transparent;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+            outline: none;
+        }
+        
+        .chat-fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            z-index: 998;
+        }
+        
+        .chat-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+        
+        .chat-fab.hidden {
+            display: none;
+        }
+        
+        .chat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 380px;
+            max-height: 550px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            display: none;
+        }
+        
+        .chat-widget.active {
+            display: block;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 1.2rem;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+        
+        .chat-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .chat-close:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .chat-body {
+            padding: 1rem;
+            height: 350px;
+            overflow-y: auto;
+            border-bottom: 1px solid #eee;
+            background: #f8f9fa;
+        }
+        
+        .chat-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chat-body::-webkit-scrollbar-thumb {
+            background: #28a745;
+            border-radius: 3px;
+        }
+        
+        .chat-input-area {
+            padding: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            background: white;
+            border-radius: 0 0 12px 12px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            border-color: #28a745;
+        }
+        
+        .chat-send-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 50%;
+            cursor: pointer;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chat-send-btn:hover {
+            background: linear-gradient(135deg, #218838, #1ea080);
+        }
+        
+        .message {
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            max-width: 75%;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            margin-left: auto;
+            text-align: right;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .ai-message {
+            background: #e9ecef;
+            color: #333;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            padding: 2rem;
+        }
+        
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            line-height: 1.2;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 3rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            font-weight: 300;
+        }
+        
+        .login-cards {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+        }
+        
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            min-width: 250px;
+            max-width: 280px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .farmer-card .card-icon { color: #28a745; }
+        .owner-card .card-icon { color: #007bff; }
+        .admin-card .card-icon { color: #6c757d; }
+        
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #333;
+        }
+        
+        .card-description {
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+        
+        .btn-custom {
+            padding: 10px 25px;
+            border-radius: 20px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.25rem;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 0.9rem;
+        }
+        
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+        
+        .btn-primary-custom:hover {
+            background: linear-gradient(135deg, #218838, #1ea080);
+            transform: translateY(-2px);
+            color: white;
+        }
+        
+        .btn-secondary-custom {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+        }
+        
+        .btn-secondary-custom:hover {
+            background: linear-gradient(135deg, #0056b3, #004085);
+            transform: translateY(-2px);
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.5rem; }
+            .hero-subtitle { font-size: 1.2rem; }
+            .login-cards { flex-direction: column; align-items: center; }
+            .login-card { min-width: 280px; margin-bottom: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Language Widget (Bottom Right) -->
+    <div class="language-widget">
+        <i class="fas fa-globe"></i>
+        <select class="language-selector" id="languageSelector" onchange="changeLanguage(this.value)">
+            <option value="en" {% if current_lang == 'en' %}selected{% endif %}>English</option>
+            <option value="te" {% if current_lang == 'te' %}selected{% endif %}>తెలుగు</option>
+            <option value="hi" {% if current_lang == 'hi' %}selected{% endif %}>हिंदी</option>
+            <option value="kn" {% if current_lang == 'kn' %}selected{% endif %}>ಕನ್ನಡ</option>
+            <option value="ta" {% if current_lang == 'ta' %}selected{% endif %}>தமிழ்</option>
+        </select>
+    </div>
+
+    <!-- Chat FAB Button -->
+    <div class="chat-fab" id="chatFab" onclick="openChat()">
+        <i class="fas fa-comments"></i>
+    </div>
+
+    <!-- AI Chat Widget -->
+    <div class="chat-widget" id="chatWidget">
+        <div class="chat-header">
+            <span><i class="fas fa-robot me-2"></i>Krushi AI Assistant</span>
+            <button class="chat-close" onclick="closeChat()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="message ai-message">
+                <span>{{ text.chat_welcome }}</span>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" class="chat-input" id="chatInput" placeholder="{{ text.chat_placeholder }}">
+            <button class="chat-send-btn" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+    <div class="hero-section">
+        <div class="container">
+            <h1 class="hero-title">
+                <i class="fas fa-tractor me-3"></i>
+                <span>{{ text.title }}</span> <span style="color: white; font-weight: bold;">: {{ text.subtitle }}</span>
+            </h1>
+            <p class="hero-subtitle">
+                {{ text.hero_subtitle }}
+            </p>
+            
+            <div class="login-cards">
+                <!-- Farmer Login Card -->
+                <div class="login-card farmer-card">
+                    <div class="card-icon">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <h3 class="card-title">{{ text.farmer_title }}</h3>
+                    <p class="card-description">
+                        {{ text.farmer_desc }}
+                    </p>
+                    <a href="{{ url_for('login', user_type='farmer') }}" class="btn-custom btn-primary-custom">
+                        <i class="fas fa-sign-in-alt me-2"></i>{{ text.login }}
+                    </a>
+                    <a href="{{ url_for('register', user_type='farmer') }}" class="btn-custom btn-secondary-custom">
+                        <i class="fas fa-user-plus me-2"></i>{{ text.register }}
+                    </a>
+                </div>
+                
+                <!-- Equipment Owner Login Card -->
+                <div class="login-card owner-card">
+                    <div class="card-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h3 class="card-title">{{ text.owner_title }}</h3>
+                    <p class="card-description">
+                        {{ text.owner_desc }}
+                    </p>
+                    <a href="{{ url_for('login', user_type='owner') }}" class="btn-custom btn-primary-custom">
+                        <i class="fas fa-sign-in-alt me-2"></i>{{ text.login }}
+                    </a>
+                    <a href="{{ url_for('register', user_type='owner') }}" class="btn-custom btn-secondary-custom">
+                        <i class="fas fa-user-plus me-2"></i>{{ text.register }}
+                    </a>
+                </div>
+                
+                <!-- Admin Login Card -->
+                <div class="login-card admin-card">
+                    <div class="card-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="card-title">{{ text.admin_title }}</h3>
+                    <p class="card-description">
+                        {{ text.admin_desc }}
+                    </p>
+                    <a href="{{ url_for('login', user_type='admin') }}" class="btn-custom btn-primary-custom">
+                        <i class="fas fa-sign-in-alt me-2"></i>{{ text.login }}
+                    </a>
+                    <div style="margin-top: 1rem;">
+                        <small class="text-muted">Default: admin / admin123</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // AI Chat functions
+        function openChat() {
+            document.getElementById('chatWidget').classList.add('active');
+            document.getElementById('chatFab').classList.add('hidden');
+            document.getElementById('chatInput').focus();
+        }
+        
+        function closeChat() {
+            document.getElementById('chatWidget').classList.remove('active');
+            document.getElementById('chatFab').classList.remove('hidden');
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addMessage(message, 'user');
+            input.value = '';
+            
+            // Show typing indicator
+            addTypingIndicator();
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                removeTypingIndicator();
+                
+                if (data.reply) {
+                    addMessage(data.reply, 'ai');
+                } else {
+                    addMessage('Sorry, I encountered an error. Please try again.', 'ai');
+                }
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage('Connection error. Please check your internet and try again.', 'ai');
+            }
+        }
+        
+        function addTypingIndicator() {
+            const chatBody = document.getElementById('chatBody');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message ai-message typing-indicator';
+            typingDiv.innerHTML = '<span>🤖 Krushi AI is typing...</span>';
+            typingDiv.id = 'typingIndicator';
+            chatBody.appendChild(typingDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+        
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        function addMessage(text, sender) {
+            const chatBody = document.getElementById('chatBody');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            messageDiv.innerHTML = `<span>${text}</span>`;
+            chatBody.appendChild(messageDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendMessage();
+        });
+        
+        // Language change function - No page reload
+        function changeLanguage(lang) {
+            console.log('Changing language to:', lang);
+            localStorage.setItem('user_language', lang);
+            
+            fetch('/set-language/' + lang)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Language set response:', data);
+                if (data.success) {
+                    updatePageContent(lang);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
+        // Initialize language on page load from localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedLang = localStorage.getItem('user_language');
+            if (savedLang) {
+                document.getElementById('languageSelector').value = savedLang;
+                fetch('/set-language/' + savedLang).then(() => {
+                    console.log('Language synced from localStorage:', savedLang);
+                });
+            }
+        });
+        
+        // Initialize language on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedLang = localStorage.getItem('user_language');
+            if (savedLang) {
+                document.getElementById('languageSelector').value = savedLang;
+                fetch('/set-language/' + savedLang);
+            }
+        });
+        
+        const translations = {
+            en: {title: 'Krushi Rent AI', subtitle: 'ML Based Rental & Recommendation System for Agriculture Equipment', hero_subtitle: 'AI-Powered Equipment Recommendations for Smart Farming', farmer_title: 'Farmer Login', farmer_desc: 'Get AI-powered equipment recommendations based on your crop, land size, and farming needs. Book equipment easily and manage your rentals.', owner_title: 'Equipment Owner', owner_desc: 'List your agricultural equipment for rent, manage bookings, track earnings, and help farmers access the tools they need.', admin_title: 'Admin Login', admin_desc: 'Monitor system performance, manage users and equipment, view analytics, and ensure smooth operation of the platform.', login: 'Login', register: 'Register', chat_placeholder: 'Ask about farming...'},
+            te: {title: 'కృషి రెంట్ AI', subtitle: 'వ్యవసాయ పరికరాల కోసం ML ఆధారిత అద్దె & సిఫార్సు వ్యవస్థ', hero_subtitle: 'స్మార్ట్ వ్యవసాయం కోసం AI-శక్తితో కూడిన పరికర సూచనలు', farmer_title: 'రైతు లాగిన్', farmer_desc: 'మీ పంట, భూమి పరిమాణం మరియు వ్యవసాయ అవసరాల ఆధారంగా AI-శక్తితో కూడిన పరికర సూచనలు పొందండి. పరికరాలను సులభంగా బుక్ చేసుకోండి.', owner_title: 'పరికర యజమాని', owner_desc: 'మీ వ్యవసాయ పరికరాలను అద్దెకు జాబితా చేయండి, బుకింగ్లను నిర్వహించండి, ఆదాయాలను ట్రాక్ చేయండి.', admin_title: 'అడ్మిన్ లాగిన్', admin_desc: 'సిస్టమ్ పనితీరును పర్యవేక్షించండి, వినియోగదారులు మరియు పరికరాలను నిర్వహించండి, విశ్లేషణలను చూడండి.', login: 'లాగిన్', register: 'నమోదు', chat_placeholder: 'వ్యవసాయం గురించి అడగండి...'},
+            hi: {title: 'कृषि रेंट AI', subtitle: 'कृषि उपकरणों के लिए ML आधारित किराया और सिफारिश प्रणाली', hero_subtitle: 'स्मार्ट खेती के लिए AI-संचालित उपकरण सुझाव', farmer_title: 'किसान लॉगिन', farmer_desc: 'अपनी फसल, भूमि के आकार और खेती की जरूरतों के आधार पर AI-संचालित उपकरण सुझाव प्राप्त करें। उपकरण आसानी से बुक करें।', owner_title: 'उपकरण मालिक', owner_desc: 'अपने कृषि उपकरणों को किराए पर सूचीबद्ध करें, बुकिंग प्रबंधित करें, कमाई ट्रैक करें।', admin_title: 'एडमिन लॉगिन', admin_desc: 'सिस्टम प्रदर्शन की निगरानी करें, उपयोगकर्ताओं और उपकरणों का प्रबंधन करें, विश्लेषण देखें।', login: 'लॉगिन', register: 'रजिस्टर', chat_placeholder: 'खेती के बारे में पूछें...'},
+            kn: {title: 'ಕೃಷಿ ರೆಂಟ್ AI', subtitle: 'ಕೃಷಿ ಉಪಕರಣಗಳಿಗಾಗಿ ML ಆಧಾರಿತ ಬಾಡಿಗೆ ಮತ್ತು ಶಿಫಾರಸು ವ್ಯವಸ್ಥೆ', hero_subtitle: 'ಸ್ಮಾರ್ಟ್ ಕೃಷಿಗಾಗಿ AI-ಚಾಲಿತ ಉಪಕರಣ ಶಿಫಾರಸುಗಳು', farmer_title: 'ರೈತ ಲಾಗಿನ್', farmer_desc: 'ನಿಮ್ಮ ಬೆಳೆ, ಭೂಮಿ ಗಾತ್ರ ಮತ್ತು ಕೃಷಿ ಅಗತ್ಯಗಳ ಆಧಾರದ ಮೇಲೆ AI-ಚಾಲಿತ ಉಪಕರಣ ಶಿಫಾರಸುಗಳನ್ನು ಪಡೆಯಿರಿ.', owner_title: 'ಉಪಕರಣ ಮಾಲೀಕ', owner_desc: 'ನಿಮ್ಮ ಕೃಷಿ ಉಪಕರಣಗಳನ್ನು ಬಾಡಿಗೆಗೆ ಪಟ್ಟಿ ಮಾಡಿ, ಬುಕಿಂಗ್ಗಳನ್ನು ನಿರ್ವಹಿಸಿ.', admin_title: 'ಅಡ್ಮಿನ್ ಲಾಗಿನ್', admin_desc: 'ಸಿಸ್ಟಮ್ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ, ಬಳಕೆದಾರರು ಮತ್ತು ಉಪಕರಣಗಳನ್ನು ನಿರ್ವಹಿಸಿ.', login: 'ಲಾಗಿನ್', register: 'ನೋಂದಣಿ', chat_placeholder: 'ಕೃಷಿಯ ಬಗ್ಗೆ ಕೇಳಿ...'},
+            ta: {title: 'கிருஷி ரென்ட் AI', subtitle: 'விவசாய உபகரணங்களுக்கான ML அடிப்படையிலான வாடகை மற்றும் பரிந்துரை அமைப்பு', hero_subtitle: 'ஸ்மார்ட் விவசாயத்திற்கான AI-இயங்கும் உபகரண பரிந்துரைகள்', farmer_title: 'விவசாயி உள்நுழைவு', farmer_desc: 'உங்கள் பயிர், நில அளவு மற்றும் விவசாய தேவைகளின் அடிப்படையில் AI-இயங்கும் உபகரண பரிந்துரைகளைப் பெறுங்கள்.', owner_title: 'உபகரண உரிமையாளர்', owner_desc: 'உங்கள் விவசாய உபகரணங்களை வாடகைக்கு பட்டியலிடுங்கள், முன்பதிவுகளை நிர்வகிக்கவும்.', admin_title: 'நிர்வாகி உள்நுழைவு', admin_desc: 'கணினி செயல்திறனை கண்காணிக்கவும், பயனர்கள் மற்றும் உபகரணங்களை நிர்வகிக்கவும்.', login: 'உள்நுழைவு', register: 'பதிவு', chat_placeholder: 'விவசாயம் பற்றி கேளுங்கள்...'}
+        };
+        
+        function updatePageContent(lang) {
+            console.log('Updating page content to:', lang);
+            const t = translations[lang] || translations.en;
+            console.log('Translation object:', t);
+            
+            // Update hero title
+            const heroTitle = document.querySelector('.hero-title');
+            if (heroTitle) {
+                const icon = heroTitle.querySelector('i');
+                heroTitle.innerHTML = '';
+                if (icon) heroTitle.appendChild(icon.cloneNode(true));
+                heroTitle.innerHTML += `<span>${t.title}</span> <span style="color: white; font-weight: bold;">: ${t.subtitle}</span>`;
+            }
+            
+            // Update hero subtitle
+            const heroSubtitle = document.querySelector('.hero-subtitle');
+            if (heroSubtitle) {
+                heroSubtitle.textContent = t.hero_subtitle;
+            }
+            
+            // Update all card titles and descriptions
+            const cards = [
+                {selector: '.farmer-card', title: t.farmer_title, desc: t.farmer_desc},
+                {selector: '.owner-card', title: t.owner_title, desc: t.owner_desc},
+                {selector: '.admin-card', title: t.admin_title, desc: t.admin_desc}
+            ];
+            
+            cards.forEach(card => {
+                const cardEl = document.querySelector(card.selector);
+                if (cardEl) {
+                    const titleEl = cardEl.querySelector('.card-title');
+                    const descEl = cardEl.querySelector('.card-description');
+                    if (titleEl) titleEl.textContent = card.title;
+                    if (descEl) descEl.textContent = card.desc;
+                    console.log('Updated', card.selector);
+                }
+            });
+            
+            // Update buttons
+            document.querySelectorAll('.btn-primary-custom').forEach(btn => {
+                btn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>' + t.login;
+            });
+            
+            const registerBtns = document.querySelectorAll('.btn-secondary-custom');
+            for (let i = 0; i < Math.min(2, registerBtns.length); i++) {
+                registerBtns[i].innerHTML = '<i class="fas fa-user-plus me-2"></i>' + t.register;
+            }
+            
+            // Update chat placeholder
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput) chatInput.placeholder = t.chat_placeholder;
+            
+            console.log('Page content updated successfully');
+        }
+    </script>
+</body>
+</html>
